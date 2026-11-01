@@ -1,4 +1,4 @@
-var VERSION = "aufgaben-v7";
+var VERSION = "aufgaben-v8";
 var DATEIEN = ["./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-512.png"];
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(VERSION).then(function (c) { return c.addAll(DATEIEN); }).then(function () { return self.skipWaiting(); }));

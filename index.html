@@ -1329,8 +1329,8 @@ function zerlege(text, h, roh) {
     if (gr === "tag") {
       for (var d = P.von; d <= P.bis; d = plusTage(d, 1)) {
         var dl = lin.filter(function (l) { return l.datum === d; }), ds = tagSumme(d), soll = +meta.soll || 0, wt = wtag(d), extra = "";
-        if (!dl.length && (wt > 4 || d > h)) continue;
         if (soll && wt < 5 && d <= h && ds < soll * 60) extra = chip("bis Tagesziel fehlen " + fmtMin(Math.round(soll * 60 - ds)), "orange");
+        if (P.woche) extra += '<button class="knopf" style="margin-left:auto" data-akt="ztag" data-d="' + d + '">Zeit buchen</button>';
         s += zKopf(WD_LANG[wt] + ", " + anz(d), ds, extra);
         if (!dl.length) s += '<div class="zleer">Nichts gebucht.</div>';
         dl.forEach(function (l) { s += zLinie(l, false); });
@@ -1386,6 +1386,7 @@ function zerlege(text, h, roh) {
   function zeitKlick(akt, ziel) {
     var h = heute(), ids;
     if (akt === "zmodus") { ui.zmodus = ziel.getAttribute("data-m"); ui.zoffset = 0; render(); return true; }
+    if (akt === "ztag") { ui.zmodus = "tag"; ui.zoffset = diffTage(ziel.getAttribute("data-d"), h); render(); window.scrollTo({ top: $("tabs").offsetTop - 12 }); return true; }
     if (akt === "znav") { var d = +ziel.getAttribute("data-d"); ui.zoffset = d === 0 ? 0 : ui.zoffset + d; render(); return true; }
     if (akt === "zue") {
       ids = ziel.getAttribute("data-ids").split(",");
