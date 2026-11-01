@@ -514,6 +514,7 @@ function zerlege(text, h, roh) {
     } catch (e) {
       if (!warnte) { warnte = true; alert("Speichern im Browser ist nicht möglich. Bitte sofort über \"Sichern\" eine Datei erzeugen."); }
     }
+    dateiPlanen();
   }
 
   function heute() { return iso(new Date()); }
@@ -721,7 +722,7 @@ function zerlege(text, h, roh) {
       '<circle class="bg" cx="48" cy="48" r="38" fill="none" stroke-width="9"/><circle class="fg" cx="48" cy="48" r="38" fill="none" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - q)).toFixed(1) + '"/></svg>' +
       '<div class="mitte"><b>' + (tot ? erl + "/" + tot : "–") + '</b><span>geschafft</span></div></div></div>' +
       '<div class="kacheln">' + kachel("ueber", z.ueber, "Überfällig", z.ueber ? " leuchtet" : "") + kachel("heute", z.heute, "Heute") + kachel("woche", z.woche, "Nächste 7 Tage") + kachel("ohne", z.ohne, "Ohne Termin") + '</div>' +
-      '<div class="hero-unten"><span class="pille ' + bk + '">' + bt + '</span><div class="rechts">' +
+      '<div class="hero-unten"><span class="pille ' + bk + '">' + bt + '</span>' + dateiPille() + '<div class="rechts">' + dateiKnopf() +
       '<button class="hbtn voll" data-akt="sichern">Sichern</button><button class="hbtn" data-akt="wiederherstellen">Wiederherstellen</button>' +
       '<button class="hbtn" data-akt="rueck">Rückblick</button><button class="hbtn" data-akt="kalender">Kalender</button>' +
       '<button class="hbtn" data-akt="papierkorb">Papierkorb (' + papierkorb.length + ')</button><button class="hbtn" data-akt="hilfe">Kürzel ?</button></div></div></div>';
@@ -971,6 +972,13 @@ function zerlege(text, h, roh) {
     if (akt === "wnav") { var d = +ziel.getAttribute("data-d"); ui.wocheOffset = d === 0 ? 0 : ui.wocheOffset + d; ui.anim = true; render(); return; }
     if (akt === "sichern") { sichern(); return; }
     if (akt === "wiederherstellen") { $("datei").click(); return; }
+    if (akt === "dverk") { dateiVerknuepfen(); return; }
+    if (akt === "dfort") { dateiFortsetzen(); return; }
+    if (akt === "dweg") { dateiLoesen(); return; }
+    if (akt === "dlade") { dateiLaden(); return; }
+    if (akt === "dueber") { dateiUeberschreiben(); return; }
+    if (akt === "iphlade") { iphoneLaden(); return; }
+    if (akt === "ihgn") { iphoneIgnorieren(); return; }
     if (akt === "suchweg") { sucheLeeren(); render(); return; }
     if (akt === "rueck") { ui.rueck = 0; modal(rueckHtml()); return; }
     if (akt === "rnav") { var rd = +ziel.getAttribute("data-d"); ui.rueck = rd === 0 ? 0 : ui.rueck + rd; modal(rueckHtml()); return; }
@@ -1185,12 +1193,195 @@ function zerlege(text, h, roh) {
     ausgeben("aufgaben-kalender-" + heute() + ".ics", "text/calendar;charset=utf-8", r.text, r.n + (r.n === 1 ? " Termin" : " Termine") + " exportiert.");
   }
 
+  /* ---------- Gemeinsamer Ordner (Edge/Chrome am Computer) ---------- */
+  /* Der PC schreibt aufgaben-daten.json in den gewählten Ordner. Vor jedem Schreiben wird geprüft, ob die Datei seit dem letzten eigenen Schreiben woanders geändert wurde. Dann wird nichts überschrieben.
+     Sicherungen vom iPhone (aufgaben-iphone-*.json) im selben Ordner werden erkannt und zum Laden angeboten. Es wird nie etwas gelöscht. */
+  var DFILE = "aufgaben-daten.json";
+  var FSA = typeof window.showDirectoryPicker === "function" && typeof indexedDB !== "undefined";
+  var datei = { dir: null, status: "aus", zeit: null, frisch: false, iphone: null }, dTimer = null, dSchreibt = false, dNochmal = false;
+  function sicherungText(stamp) { return JSON.stringify({ version: 3, aufgaben: aufgaben, papierkorb: papierkorb, gesichert: stamp || new Date().toISOString(), basis: meta.basis || "" }, null, 2); }
+  function zeitText(stamp) { var d = new Date(stamp); return anz(iso(d)) + " " + p2(d.getHours()) + ":" + p2(d.getMinutes()); }
+  function idb(fn) {
+    return new Promise(function (res, rej) {
+      var r = indexedDB.open("aufgaben_dateien", 1);
+      r.onupgradeneeded = function () { r.result.createObjectStore("h"); };
+      r.onerror = function () { rej(r.error); };
+      r.onsuccess = function () {
+        var t = r.result.transaction("h", "readwrite"), q = fn(t.objectStore("h"));
+        t.oncomplete = function () { r.result.close(); res(q && q.result); };
+        t.onerror = function () { rej(t.error); };
+      };
+    });
+  }
+  function dateiPille() {
+    var s = "";
+    if (datei.status === "bereit") s += '<span class="pille ok" title="Jede Änderung wird automatisch in ' + DFILE + ' in diesem Ordner gespeichert">Ordner: ' + esc(datei.dir.name) + (datei.zeit ? " · " + p2(datei.zeit.getHours()) + ":" + p2(datei.zeit.getMinutes()) : "") + '</span>';
+    else if (datei.status === "erlaubnis") s += '<span class="pille warn">Ordner wartet auf Freigabe</span>';
+    else if (datei.status === "konflikt") s += '<span class="pille schlecht" title="Die Datei im Ordner hat einen anderen Stand als den, den dieser PC zuletzt geschrieben hat. Es wird nichts überschrieben, bis du entscheidest.">Datei wurde woanders geändert</span>';
+    else if (datei.status === "fehler") s += '<span class="pille schlecht">Speichern im Ordner fehlgeschlagen</span>';
+    if (datei.iphone) s += '<span class="pille warn" title="' + esc(datei.iphone.name) + '">Neuer Stand vom iPhone (' + esc(zeitText(datei.iphone.stamp)) + ')</span>';
+    return s;
+  }
+  function dateiKnopf() {
+    if (!FSA) return "";
+    var s = "";
+    if (datei.iphone) s += '<button class="hbtn voll" data-akt="iphlade">Vom iPhone laden</button><button class="hbtn" data-akt="ihgn">Ignorieren</button>';
+    if (datei.status === "aus") return s + '<button class="hbtn" data-akt="dverk" title="Ordner wählen, in dem aufgaben-daten.json automatisch gespeichert wird">Ordner verknüpfen</button>';
+    if (datei.status === "bereit") return s + '<button class="hbtn" data-akt="dweg">Verknüpfung lösen</button>';
+    if (datei.status === "konflikt") return s + '<button class="hbtn voll" data-akt="dlade">Aus Datei laden</button><button class="hbtn" data-akt="dueber">Datei überschreiben</button><button class="hbtn" data-akt="dweg">Lösen</button>';
+    return s + '<button class="hbtn voll" data-akt="dfort">' + (datei.status === "fehler" ? "Erneut versuchen" : "Verknüpfung fortsetzen") + '</button><button class="hbtn" data-akt="dweg">Lösen</button>';
+  }
+  function masterDatei() {
+    return datei.dir.getFileHandle(DFILE).then(function (h) { return h.getFile(); }, function (err) { if (err && err.name === "NotFoundError") return null; throw err; });
+  }
+  function dateiPruefen() {
+    if (datei.frisch) return Promise.resolve("ok");
+    return masterDatei().then(function (f) {
+      if (!f || !f.size) return "ok";
+      return f.text().then(function (t) {
+        var j; try { j = JSON.parse(t); } catch (e) { return "konflikt"; }
+        return (j && j.gesichert && j.gesichert === meta.dateiStand) ? "ok" : "konflikt";
+      });
+    });
+  }
+  function dateiPlanen() {
+    if (!datei.dir || (datei.status !== "bereit" && datei.status !== "fehler")) return;
+    clearTimeout(dTimer); dTimer = setTimeout(dateiSchreiben, 800);
+  }
+  function dateiSchreiben() {
+    clearTimeout(dTimer); dTimer = null;
+    if (!datei.dir || (datei.status !== "bereit" && datei.status !== "fehler")) return Promise.resolve();
+    if (dSchreibt) { dNochmal = true; return Promise.resolve(); }
+    dSchreibt = true;
+    var stamp = new Date().toISOString();
+    return dateiPruefen().then(function (r) {
+      if (r === "konflikt") { datei.status = "konflikt"; return; }
+      return datei.dir.getFileHandle(DFILE, { create: true }).then(function (h) { return h.createWritable(); }).then(function (w) {
+        return w.write(sicherungText(stamp)).then(function () { return w.close(); });
+      }).then(function () {
+        datei.status = "bereit"; datei.frisch = false; datei.zeit = new Date();
+        meta.dateiStand = stamp; meta.letzteSicherung = heute();
+        try { localStorage.setItem(KEY_META, JSON.stringify(meta)); } catch (e) {}
+      });
+    }).catch(function (err) {
+      datei.status = (err && err.name === "NotAllowedError") ? "erlaubnis" : "fehler";
+      if (datei.status === "fehler") toast("Speichern im Ordner ist fehlgeschlagen: " + (err && err.message ? err.message : err));
+    }).then(function () {
+      dSchreibt = false; renderKopf();
+      if (datei.status === "konflikt") toast("Die Datei im Ordner hat einen anderen Stand. Es wurde nichts überschrieben. Wähle \"Aus Datei laden\" oder \"Datei überschreiben\".");
+      if (dNochmal) { dNochmal = false; dateiPlanen(); }
+    });
+  }
+  async function iphoneSuchen() {
+    if (!datei.dir || datei.status === "aus" || datei.status === "erlaubnis") return;
+    var best = null;
+    try {
+      for await (var e of datei.dir.entries()) {
+        var name = e[0], h = e[1];
+        if (h.kind !== "file" || !/^aufgaben-iphone.*\.json$/i.test(name)) continue;
+        var j;
+        try { j = JSON.parse(await (await h.getFile()).text()); } catch (x) { continue; }
+        if (!j || !j.gesichert || !Array.isArray(j.aufgaben) || j.gesichert <= (meta.iphoneStand || "")) continue;
+        if (!best || j.gesichert > best.stamp) best = { name: name, handle: h, stamp: j.gesichert, anzahl: j.aufgaben.length, basis: j.basis || "" };
+      }
+    } catch (err) { return; }
+    datei.iphone = best; renderKopf();
+  }
+  function iphoneLaden() {
+    var ip = datei.iphone; if (!ip) return;
+    ip.handle.getFile().then(function (f) { return f.text(); }).then(function (t) {
+      var d = JSON.parse(t), neu = d.aufgaben;
+      if (!Array.isArray(neu)) throw new Error("Falsches Format");
+      var sauber = ip.basis && ip.basis === meta.dateiStand;
+      var frage = sauber
+        ? "Der Stand vom iPhone (" + neu.length + " Aufgaben, " + zeitText(ip.stamp) + ") ersetzt den Stand auf diesem PC (" + aufgaben.length + " Aufgaben). Der PC hat seit dem Abgleich mit dem iPhone nichts Eigenes gespeichert. Fortfahren?"
+        : "ACHTUNG: Die iPhone-Datei (" + neu.length + " Aufgaben, " + zeitText(ip.stamp) + ") baut nicht auf dem letzten Stand dieses PCs auf. Änderungen, die du hier seit dem letzten Abgleich gemacht hast, gehen verloren (aktuell " + aufgaben.length + " Aufgaben). Fortfahren?";
+      if (!confirm(frage)) return;
+      aufgaben = neu.map(norm);
+      if (Array.isArray(d.papierkorb)) papierkorb = d.papierkorb.map(function (e) { return { a: norm(e.a || e), am: e.am || "" }; });
+      meta.iphoneStand = ip.stamp; datei.iphone = null; ui.offenId = null; ui.anim = true;
+      speichern(); render(); toast(aufgaben.length + " Aufgaben vom iPhone geladen.");
+    }).catch(function (err) { alert("Die iPhone-Datei konnte nicht gelesen werden: " + (err && err.message ? err.message : err)); });
+  }
+  function iphoneIgnorieren() {
+    if (!datei.iphone) return;
+    meta.iphoneStand = datei.iphone.stamp; datei.iphone = null; speichern(); renderKopf();
+  }
+  function dateiVerknuepfen() {
+    window.showDirectoryPicker({ id: "aufgaben", mode: "readwrite" }).then(function (dir) {
+      datei.dir = dir; datei.status = "bereit"; datei.frisch = false; meta.dateiStand = "";
+      return idb(function (st) { return st.put(dir, "ordner"); }).then(dateiSchreiben).then(function () {
+        if (datei.status === "bereit") toast("Verknüpft. Jede Änderung wird jetzt automatisch in " + DFILE + " im Ordner \"" + dir.name + "\" gespeichert.");
+        return iphoneSuchen();
+      });
+    }, function (err) { if (!err || err.name !== "AbortError") toast("Der Ordner konnte nicht gewählt werden: " + (err && err.message ? err.message : err)); });
+  }
+  function dateiFortsetzen() {
+    if (!datei.dir) return;
+    datei.dir.requestPermission({ mode: "readwrite" }).then(function (p) {
+      if (p !== "granted") { toast("Ohne Freigabe kann nicht in den Ordner gespeichert werden."); return; }
+      datei.status = "bereit";
+      return dateiPruefen().then(function (r) {
+        if (r === "konflikt") { datei.status = "konflikt"; renderKopf(); toast("Die Datei im Ordner hat einen anderen Stand. Wähle \"Aus Datei laden\" oder \"Datei überschreiben\"."); }
+        else { renderKopf(); dateiPlanen(); }
+        return iphoneSuchen();
+      });
+    }).catch(function (err) { toast("Freigabe nicht möglich: " + (err && err.message ? err.message : err)); });
+  }
+  function dateiLaden() {
+    if (!datei.dir) return;
+    masterDatei().then(function (f) { if (!f) throw new Error("Die Datei " + DFILE + " liegt nicht mehr im Ordner."); return f.text(); }).then(function (t) {
+      var d = JSON.parse(t), neu = Array.isArray(d) ? d : d.aufgaben;
+      if (!Array.isArray(neu)) throw new Error("Falsches Format");
+      if (!confirm("Das ersetzt alle aktuellen Aufgaben (" + aufgaben.length + ") auf diesem PC durch " + neu.length + " Aufgaben aus der Datei. Fortfahren?")) return;
+      aufgaben = neu.map(norm);
+      if (!Array.isArray(d) && Array.isArray(d.papierkorb)) papierkorb = d.papierkorb.map(function (e) { return { a: norm(e.a || e), am: e.am || "" }; });
+      meta.dateiStand = d.gesichert || ""; datei.status = "bereit"; ui.offenId = null; ui.anim = true;
+      speichern(); render(); toast(aufgaben.length + " Aufgaben aus der Datei geladen.");
+    }).catch(function (err) { alert("Die Datei konnte nicht gelesen werden: " + (err && err.message ? err.message : err)); });
+  }
+  function dateiUeberschreiben() {
+    if (!confirm("Die Datei im Ordner wird mit dem Stand dieses PCs überschrieben. Änderungen in der Datei, die hier fehlen, gehen verloren. Fortfahren?")) return;
+    datei.status = "bereit"; datei.frisch = true;
+    dateiSchreiben();
+  }
+  function dateiLoesen() {
+    datei.dir = null; datei.status = "aus"; datei.zeit = null; datei.iphone = null; clearTimeout(dTimer);
+    idb(function (st) { return st.delete("ordner"); }).catch(function () {});
+    renderKopf(); toast("Verknüpfung gelöst. Die Dateien im Ordner bleiben unverändert.");
+  }
+  function dateiInit() {
+    if (!FSA) return;
+    idb(function (st) { return st.get("ordner"); }).then(function (dir) {
+      if (!dir) return;
+      datei.dir = dir;
+      return dir.queryPermission({ mode: "readwrite" }).then(function (p) {
+        if (p !== "granted") { datei.status = "erlaubnis"; renderKopf(); return; }
+        datei.status = "bereit";
+        return dateiPruefen().then(function (r) { if (r === "konflikt") datei.status = "konflikt"; renderKopf(); return iphoneSuchen(); });
+      });
+    }).catch(function () {});
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "hidden" && dTimer) dateiSchreiben();
+      if (document.visibilityState === "visible") iphoneSuchen();
+    });
+  }
+  function sichernMitDialog() {
+    var opt = { suggestedName: "aufgaben-sicherung-" + heute() + ".json", id: "aufgaben-sicherung", types: [{ description: "Aufgaben (JSON)", accept: { "application/json": [".json"] } }] };
+    if (datei.dir) opt.startIn = datei.dir;
+    window.showSaveFilePicker(opt).then(function (h) {
+      return h.createWritable().then(function (w) { return w.write(sicherungText()).then(function () { return w.close(); }); }).then(function () {
+        meta.letzteSicherung = heute(); speichern(); renderKopf(); toast("Sicherung gespeichert: " + h.name);
+      });
+    }, function (err) { if (!err || err.name !== "AbortError") toast("Sichern ist nicht möglich: " + (err && err.message ? err.message : err)); });
+  }
+
   /* ---------- Sichern und Wiederherstellen ---------- */
   function ausgeben(name, mime, text, meldung) {
     var blob = new Blob([text], { type: mime }), datei = null;
     try { datei = new File([blob], name, { type: mime.split(";")[0] }); } catch (e) {}
     if (datei && navigator.canShare && navigator.canShare({ files: [datei] })) {
-      navigator.share({ files: [datei], title: name }).then(function () { toast(meldung); }, function () {});
+      navigator.share({ files: [datei] }).then(function () { toast(meldung); }, function () {});
       return;
     }
     var l = document.createElement("a");
@@ -1201,14 +1392,15 @@ function zerlege(text, h, roh) {
   }
 
   function sichern() {
+    if (typeof window.showSaveFilePicker === "function") { sichernMitDialog(); return; }
     meta.letzteSicherung = heute(); speichern();
-    var blob = new Blob([JSON.stringify({ version: 3, aufgaben: aufgaben, papierkorb: papierkorb, gesichert: new Date().toISOString() }, null, 2)], { type: "application/json" });
-    var name = "aufgaben-daten.json";
+    var blob = new Blob([sicherungText()], { type: "application/json" });
+    var jetzt = new Date(), name = "aufgaben-iphone-" + heute() + "-" + p2(jetzt.getHours()) + p2(jetzt.getMinutes()) + ".json";
     renderKopf();
     var datei = null;
     try { datei = new File([blob], name, { type: "application/json" }); } catch (e) {}
     if (datei && navigator.canShare && navigator.canShare({ files: [datei] })) {
-      navigator.share({ files: [datei], title: "Aufgaben-Sicherung" }).then(function () { toast("Sicherung weitergegeben. Speichere sie in \"Dateien\" im DRACOON-Ordner und wähle \"Ersetzen\"."); }, function () {});
+      navigator.share({ files: [datei] }).then(function () { toast("Sicherung weitergegeben. Speichere sie in \"Dateien\" im DRACOON-Ordner. Am PC dann \"Wiederherstellen\" und diese Datei wählen."); }, function () {});
       return;
     }
     var l = document.createElement("a");
@@ -1228,7 +1420,7 @@ function zerlege(text, h, roh) {
         var d = JSON.parse(r.result), neu = Array.isArray(d) ? d : d.aufgaben;
         if (!Array.isArray(neu)) throw new Error("Falsches Format");
         if (!confirm("Wiederherstellen ersetzt alle aktuellen Aufgaben (" + aufgaben.length + ") durch " + neu.length + " Aufgaben aus der Datei. Fortfahren?")) { dat_.value = ""; return; }
-        aufgaben = neu.map(norm);
+        aufgaben = neu.map(norm); meta.basis = (!Array.isArray(d) && d.gesichert) || "";
         if (!Array.isArray(d) && Array.isArray(d.papierkorb)) papierkorb = d.papierkorb.map(function (e) { return { a: norm(e.a || e), am: e.am || "" }; });
         ui.offenId = null; speichern(); ui.anim = true; render(); toast(aufgaben.length + " Aufgaben wiederhergestellt.");
       } catch (err) { alert("Die Datei konnte nicht gelesen werden: " + err.message); }
@@ -1237,6 +1429,7 @@ function zerlege(text, h, roh) {
     r.readAsText(f);
   });
 
+  dateiInit();
   vorschau(); render();
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
