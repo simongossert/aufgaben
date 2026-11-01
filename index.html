@@ -261,6 +261,48 @@ select:focus, input:focus, textarea:focus { border-color: var(--a1); box-shadow:
 .rk-leer { color: var(--muted); margin: 4px 0; }
 .opt { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; }
 .opt input { margin-top: 3px; flex: none; }
+
+/* ---------- Zeiterfassung ---------- */
+.zeitzeile { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 0 14px 12px 62px; }
+.kompakt .zeitzeile { display: none; }
+.zbtn { padding: 5px 11px; border-radius: 999px; border: 1px solid #d6d4ee; background: #fff; font-size: 12.5px; font-weight: 700; color: var(--a1); transition: all .15s; display: inline-flex; align-items: center; gap: 5px; }
+.zbtn:hover { background: #f5f3ff; border-color: var(--a1); }
+.zbtn svg { width: 12px; height: 12px; fill: currentColor; stroke: none; }
+.zbtn.start { background: #eef2ff; }
+.zbtn.lauf { background: linear-gradient(120deg, #0ea5e9, #6d5dfc); color: #fff; border-color: transparent; }
+.zsumme { margin-left: auto; font-size: 12px; color: var(--muted); font-weight: 600; }
+.laeuft { position: sticky; top: 8px; z-index: 35; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 12px 0 0; padding: 10px 14px; border-radius: 16px; color: #fff; background: linear-gradient(120deg, #0ea5e9, #6d5dfc 60%, #a855f7); box-shadow: 0 16px 30px -14px rgba(14,165,233,.8); }
+.laeuft .lp { width: 10px; height: 10px; border-radius: 50%; background: #fff; animation: puls 1.4s ease-in-out infinite; }
+@keyframes puls { 50% { opacity: .25; transform: scale(.7); } }
+.laeuft .lt { flex: 1 1 140px; min-width: 0; font-weight: 700; overflow-wrap: anywhere; }
+.laeuft .lz { font-variant-numeric: tabular-nums; font-size: 18px; }
+.laeuft .knopf { background: rgba(255,255,255,.2); color: #fff; border-color: rgba(255,255,255,.4); }
+.laeuft .knopf:hover { background: rgba(255,255,255,.34); }
+button.pille { font: inherit; font-size: 12.5px; font-weight: 600; color: inherit; cursor: pointer; }
+.zeitbox { background: #f4faff; border: 1px solid #cfe8fb; border-radius: 14px; padding: 10px 12px; }
+.zeitbox .ukopf { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+.details .urow input[type=date] { flex: 0 0 auto; width: auto; }
+.details .urow input.zmin { flex: 0 0 92px; width: 92px; text-align: right; }
+.zkopf { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.zkopf .rechts { margin-left: auto; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.zfrei { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 12px 14px; margin: 14px 0; }
+.zfrei .zr { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+.zfrei input[type=text] { flex: 1 1 160px; min-width: 0; }
+.zfrei .tit { font-size: 12px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.zvor { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 10px 14px; margin-bottom: 8px; }
+.zvor .t { flex: 1 1 220px; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+.zvor .b { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.zl { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 8px 12px; margin-bottom: 6px; }
+.zl.ue { opacity: .6; }
+.zl .zt { flex: 1 1 auto; min-width: 0; cursor: pointer; }
+.zl .zt .titel { font-size: 15px; }
+.zl .zz { font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.zl.ue .zt .titel { text-decoration: line-through; }
+.zexport { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+.zleer { color: var(--muted); padding: 4px 6px 10px; }
+.zinfo { color: var(--muted); font-size: 13px; margin: 4px 2px 10px; }
+.zset { margin: 0 0 12px; }
+.zset summary { cursor: pointer; font-weight: 600; color: var(--muted); font-size: 13px; padding: 6px 2px; }
 @media (max-width: 560px) { .suche { max-width: none; flex-basis: 100%; margin-top: 12px; } }
 @media (max-width: 760px) {
   .kacheln { grid-template-columns: repeat(2, 1fr); }
@@ -303,6 +345,7 @@ body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: 
   .hero { padding: 18px 18px 32px; border-radius: 24px; } .hero h1 { font-size: 26px; } .kacheln { gap: 8px; margin-top: 14px; } .kachel { padding: 10px 12px; border-radius: 14px; } .kachel .zahl { font-size: 26px; } .kachel .lbl { font-size: 12px; margin-top: 3px; } .ring, .ring svg { width: 72px; height: 72px; } .ring .mitte b { font-size: 17px; } .hero-unten { margin-top: 12px; } .hbtn { padding: 8px 12px; font-size: 13px; } .erfassen { margin: -22px 4px 0; padding-left: 14px; } .erfassen .plus { display: none; } .senden .lang { display: none; } .senden .kurz { display: inline; font-size: 24px; line-height: 1; } .senden { padding: 8px 18px; border-radius: 14px; } }
 .uhaken { width: 32px; height: 32px; } .uhaken svg { width: 18px; height: 18px; } .urow { min-height: 44px; } .urow .knopf, .banner.info .knopf, .rk-z, .opt { min-height: 40px; }
 .suche input { min-height: 44px; } .opt input { width: 22px; height: 22px; }
+.zbtn { min-height: 40px; padding: 0 14px; font-size: 14px; } .zeitzeile { padding-left: 14px; } .laeuft { top: calc(8px + env(safe-area-inset-top)); } .zl .uhaken { width: 32px; height: 32px; } .zl .ico { width: 40px; height: 40px; } .zfrei input[type=date] { min-height: 44px; }
 @media (max-width: 760px) { .raster { grid-template-columns: repeat(7, 78vw); } .aktionen { width: 100%; } }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 </style>
@@ -317,6 +360,7 @@ body::before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: 
   </div>
   <div class="vorschau" id="vorschau"></div>
   <div class="installhinweis" id="installhinweis"><span>Zum Installieren: unten auf <b>Teilen</b> tippen, dann <b>Zum Home-Bildschirm</b>.</span><button id="installzu">OK</button></div>
+  <div id="laeuft"></div>
   <div class="leiste"><div id="tabs"></div><div class="suche"><input id="suche" type="search" autocomplete="off" placeholder="Suchen in Titel, Notiz, Mandant …" aria-label="Suchen"></div></div>
   <div id="filter"></div>
   <div id="inhalt"></div>
@@ -457,18 +501,34 @@ function parseEingabe(text, h) {
   return erg;
 }
 
+/* Dauer aus Text: 45 · 45min · 1,5h · 1h30 · 1:30 · 2 std (Dezimalzahl ohne Einheit = Stunden). Ergebnis in Minuten, 0 = nicht erkannt */
+function parseDauer(t) {
+  t = String(t || "").trim().toLowerCase().replace(/\s+/g, "");
+  var m, r = 0;
+  if ((m = /^(\d{1,2}):(\d{2})$/.exec(t))) r = (+m[1]) * 60 + (+m[2]);
+  else if ((m = /^(\d+)(?:h|std|stunden?)(\d{1,2})(?:m|min)?$/.exec(t))) r = (+m[1]) * 60 + (+m[2]);
+  else if ((m = /^(\d+(?:[.,]\d+)?)(?:h|std|stunden?)$/.exec(t))) r = Math.round(parseFloat(m[1].replace(",", ".")) * 60);
+  else if ((m = /^(\d+)(?:m|min|minuten?)$/.exec(t))) r = +m[1];
+  else if ((m = /^(\d+)$/.exec(t))) r = +m[1];
+  else if ((m = /^(\d+[.,]\d+)$/.exec(t))) r = Math.round(parseFloat(m[1].replace(",", ".")) * 60);
+  return r > 0 && r <= 1440 ? r : 0;
+}
 /* Zerlegt die Eingabe: Mandant (m:), Projekt (p:), Unteraufgaben ("Titel: a; b") und danach Datum/Kürzel */
 function zerlege(text, h, roh) {
   var t = (text || "").trim();
-  var nix = { titel: t, plan: "", deadline: "", wichtig: false, dringend: false, quelle: "", mandant: "", projekt: "", unter: [], erkannt: false };
+  var nix = { titel: t, plan: "", deadline: "", wichtig: false, dringend: false, quelle: "", mandant: "", projekt: "", unter: [], zeit: 0, erkannt: false };
   if (roh || !t) return nix;
-  var mandant = "", projekt = "", unter = [], s = t;
+  var mandant = "", projekt = "", unter = [], zeit = 0, s = t;
   s = s.replace(/(^|\s)(mandant|projekt|m|p):(?:"([^"]+)"|(\S+))/giu, function (alles, v, k, q, w) {
     var val = (q || w || "").trim(), rest = "";
     if (!q && /:$/.test(val)) { val = val.slice(0, -1); rest = ":"; }
     if (!val) return alles;
     if (/^m/i.test(k)) mandant = val; else projekt = val;
     return v + rest;
+  });
+  s = s.replace(/(^|\s)z:(\S+)/giu, function (alles, v, w) {
+    var rest = ""; if (/:$/.test(w)) { w = w.slice(0, -1); rest = ":"; }
+    var m = parseDauer(w); if (!m) return alles; zeit = m; return v + rest;
   });
   var sp = /^([^:;]+?):\s+([\s\S]*;[\s\S]*)$/.exec(s);
   if (sp && !/(?:^|\s)(?:bis|spätestens|deadline|frist|fällig|dl|am|an|für|ab|zum|plan|geplant)$/i.test(sp[1].trim())) {
@@ -478,8 +538,8 @@ function zerlege(text, h, roh) {
   s = s.replace(/\s+/g, " ").trim();
   if (!s.replace(/[\s:;]+/g, "")) return nix;
   var p = parseEingabe(s, h);
-  p.mandant = mandant; p.projekt = projekt; p.unter = unter;
-  p.erkannt = !!(p.erkannt || mandant || projekt || unter.length);
+  p.mandant = mandant; p.projekt = projekt; p.unter = unter; p.zeit = zeit;
+  p.erkannt = !!(p.erkannt || mandant || projekt || unter.length || zeit);
   return p;
 }
 /*PARSER_END*/
@@ -487,7 +547,7 @@ function zerlege(text, h, roh) {
 
 <script>
 (function () {
-  var KEY = "aufgaben_v1", KEY_PK = "aufgaben_papierkorb_v1", KEY_META = "aufgaben_meta_v1";
+  var KEY = "aufgaben_v1", KEY_PK = "aufgaben_papierkorb_v1", KEY_META = "aufgaben_meta_v1", KEY_Z = "aufgaben_zeiten_v1";
   var TAGESLIMIT = 6;
   var QUELLEN = ["E-Mail", "Telefon", "Gespräch", "Idee"];
 
@@ -496,14 +556,15 @@ function zerlege(text, h, roh) {
   function norm(a) {
     return { id: a.id || neueId(), titel: String(a.titel || "").trim() || "(ohne Titel)", eingang: a.eingang || "", deadline: a.deadline || "",
       plan: a.plan || "", erledigt: !!a.erledigt, erledigtAm: a.erledigtAm || "", wichtig: !!a.wichtig, dringend: !!a.dringend,
-      quelle: a.quelle || "", notiz: a.notiz || "", mandant: String(a.mandant || "").trim(), projekt: String(a.projekt || "").trim(),
+      quelle: a.quelle || "", notiz: a.notiz || "", mandant: String(a.mandant || "").trim(), projekt: String(a.projekt || "").trim(), ohneZeit: !!a.ohneZeit,
       unter: Array.isArray(a.unter) ? a.unter.map(function (u) { return { id: u.id || neueId(), titel: String(u.titel || "").trim(), erledigt: !!u.erledigt }; }).filter(function (u) { return u.titel; }) : [] };
   }
   var aufgaben = lade(KEY, []).map(norm);
   var papierkorb = lade(KEY_PK, []).map(function (e) { return { a: norm(e.a || e), am: e.am || "" }; });
   var meta = lade(KEY_META, {});
+  var zeiten = lade(KEY_Z, []).map(normZ).filter(zOk);
   var ui = { tab: meta.tab || "heute", status: "offen", wichtig: false, dringend: false, sort: "gruppe", kachel: null,
-    offenId: null, wocheOffset: 0, anim: true, zaehlen: true, neueId: null, mandant: "", projekt: "", suche: "", rueck: 0 };
+    offenId: null, wocheOffset: 0, anim: true, zaehlen: true, neueId: null, mandant: "", projekt: "", suche: "", rueck: 0, zmodus: "woche", zoffset: 0, zgruppe: "tag", zedit: [], zfm: "" };
   var warnte = false;
 
   function speichern() {
@@ -511,6 +572,7 @@ function zerlege(text, h, roh) {
       localStorage.setItem(KEY, JSON.stringify(aufgaben));
       localStorage.setItem(KEY_PK, JSON.stringify(papierkorb));
       localStorage.setItem(KEY_META, JSON.stringify(meta));
+      localStorage.setItem(KEY_Z, JSON.stringify(zeiten));
     } catch (e) {
       if (!warnte) { warnte = true; alert("Speichern im Browser ist nicht möglich. Bitte sofort über \"Sichern\" eine Datei erzeugen."); }
     }
@@ -550,7 +612,10 @@ function zerlege(text, h, roh) {
     runter: '<svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>',
     links: '<svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>',
     rechts: '<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
-    x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+    x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    play: '<svg viewBox="0 0 24 24"><path d="M7 4.5l12 7.5-12 7.5z"/></svg>',
+    stop: '<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+    kopie: '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>'
   };
 
   /* ---------- Auswahl der Aufgaben ---------- */
@@ -666,7 +731,7 @@ function zerlege(text, h, roh) {
     var html = '<div class="' + c.join(" ") + '" data-id="' + a.id + '" style="--i:' + Math.min(o.i || 0, 12) + '"><div class="kopf">' +
       '<button class="haken" data-akt="erledigt" title="Erledigt">' + IC.haken + '</button>' +
       '<div class="haupt" data-akt="auf"><div class="titel">' + esc(a.titel) + '</div><div class="chips">' + chipsFor(a, o) + '</div></div>' +
-      '<div class="aktionen">' + akt + '</div></div>';
+      '<div class="aktionen">' + akt + '</div></div>' + zeitZeile(a, o);
     if (a.id === ui.offenId) {
       html += '<div class="details">' +
         '<label class="breit">Titel<input type="text" data-feld="titel" value="' + esc(a.titel) + '"></label>' +
@@ -676,7 +741,7 @@ function zerlege(text, h, roh) {
         '<label>Quelle<select data-feld="quelle"><option value="">–</option>' + QUELLEN.map(function (q) { return '<option' + (a.quelle === q ? " selected" : "") + '>' + q + '</option>'; }).join("") + '</select></label>' +
         '<label>Mandant<input type="text" list="dlm" data-feld="mandant" value="' + esc(a.mandant) + '" placeholder="z. B. Müller GmbH"></label>' +
         '<label>Projekt<input type="text" list="dlp" data-feld="projekt" value="' + esc(a.projekt) + '" placeholder="z. B. Jahresabschluss 2025"></label>' +
-        datalist("dlm", "mandant") + datalist("dlp", "projekt") + unterHtml(a) +
+        datalist("dlm", "mandant") + datalist("dlp", "projekt") + unterHtml(a) + zeitDetails(a) +
         '<label class="breit">Notiz<textarea data-feld="notiz">' + esc(a.notiz) + '</textarea></label>' +
         '<button class="loeschen" data-akt="loeschen">In den Papierkorb</button></div>';
     }
@@ -722,7 +787,7 @@ function zerlege(text, h, roh) {
       '<circle class="bg" cx="48" cy="48" r="38" fill="none" stroke-width="9"/><circle class="fg" cx="48" cy="48" r="38" fill="none" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - q)).toFixed(1) + '"/></svg>' +
       '<div class="mitte"><b>' + (tot ? erl + "/" + tot : "–") + '</b><span>geschafft</span></div></div></div>' +
       '<div class="kacheln">' + kachel("ueber", z.ueber, "Überfällig", z.ueber ? " leuchtet" : "") + kachel("heute", z.heute, "Heute") + kachel("woche", z.woche, "Nächste 7 Tage") + kachel("ohne", z.ohne, "Ohne Termin") + '</div>' +
-      '<div class="hero-unten"><span class="pille ' + bk + '">' + bt + '</span>' + dateiPille() + '<div class="rechts">' + dateiKnopf() +
+      '<div class="hero-unten"><span class="pille ' + bk + '">' + bt + '</span>' + zeitPille() + dateiPille() + '<div class="rechts">' + dateiKnopf() +
       '<button class="hbtn voll" data-akt="sichern">Sichern</button><button class="hbtn" data-akt="wiederherstellen">Wiederherstellen</button>' +
       '<button class="hbtn" data-akt="rueck">Rückblick</button><button class="hbtn" data-akt="kalender">Kalender</button>' +
       '<button class="hbtn" data-akt="papierkorb">Papierkorb (' + papierkorb.length + ')</button><button class="hbtn" data-akt="hilfe">Kürzel ?</button></div></div></div>';
@@ -738,14 +803,14 @@ function zerlege(text, h, roh) {
   }
 
   function renderTabs() {
-    var t = [["heute", "Heute", heuteAnzahl()], ["woche", "Woche"], ["alle", "Alle"], ["eigene", "Eigene Reihenfolge"]];
+    var t = [["heute", "Heute", heuteAnzahl()], ["woche", "Woche"], ["alle", "Alle"], ["eigene", "Eigene Reihenfolge"], ["zeit", "Zeit"]];
     $("tabs").innerHTML = '<div class="tabs">' + t.map(function (x) {
       return '<button class="tab' + (ui.tab === x[0] ? " an" : "") + '" data-akt="tab" data-t="' + x[0] + '">' + (x[0] === "eigene" ? '<span class="lang">Eigene Reihenfolge</span><span class="kurz">Eigene</span>' : x[1]) + (x[2] !== undefined ? '<span class="zaehler">' + x[2] + '</span>' : "") + '</button>';
     }).join("") + '</div>';
   }
 
   function renderFilter() {
-    if (ui.tab === "woche" || ui.suche.trim()) { $("filter").innerHTML = ""; return; }
+    if (ui.tab === "woche" || ui.tab === "zeit" || ui.suche.trim()) { $("filter").innerHTML = ""; return; }
     var s = '<div class="filter">';
     if (ui.tab !== "heute") s += '<label>Zeige <select data-ui="status"><option value="offen"' + (ui.status === "offen" ? " selected" : "") + '>Offene</option><option value="erledigt"' + (ui.status === "erledigt" ? " selected" : "") + '>Erledigte</option><option value="alle"' + (ui.status === "alle" ? " selected" : "") + '>Alle</option></select></label>';
     s += '<button class="fchip' + (ui.wichtig ? " an" : "") + '" data-akt="fchip" data-f="wichtig">' + IC.stern + 'Wichtig</button>' +
@@ -768,6 +833,7 @@ function zerlege(text, h, roh) {
     var h = heute(), el = $("inhalt"), html = "", n = 0;
     el.className = ui.anim ? "anim" : "";
     if (ui.suche.trim()) { el.innerHTML = suchHtml(); ui.anim = false; return; }
+    if (ui.tab === "zeit") { el.innerHTML = zeitHtml(); ui.anim = false; return; }
     if (ui.tab === "heute") {
       var gr = heuteGruppen();
       if (planAnzahl(h) > TAGESLIMIT) html += '<div class="banner warn">Für heute sind ' + planAnzahl(h) + ' Aufgaben eingeplant. Dein Limit liegt bei ' + TAGESLIMIT + '. Verschiebe etwas auf morgen.</div>';
@@ -857,7 +923,7 @@ function zerlege(text, h, roh) {
   function render() {
     if (ui.mandant && werte("mandant").indexOf(ui.mandant) < 0) ui.mandant = "";
     if (ui.projekt && werte("projekt").indexOf(ui.projekt) < 0) ui.projekt = "";
-    renderKopf(); renderTabs(); renderFilter(); renderInhalt();
+    renderKopf(); renderTimer(); renderTabs(); renderFilter(); renderInhalt();
   }
 
   /* ---------- Hilfsfunktionen ---------- */
@@ -903,6 +969,7 @@ function zerlege(text, h, roh) {
       ["#mail · #telefon · #gespräch · #idee", "Quelle"],
       ["m:Müller · mandant:\"Müller GmbH\"", "Mandant"],
       ["p:Abschluss · projekt:\"Jahresabschluss 2025\"", "Projekt"],
+      ["z:30 · z:1,5h · z:45min", "Zeit sofort buchen (heute), z. B. Anruf Müller z:15"],
       ["Titel: Schritt 1; Schritt 2; Schritt 3", "Aufgabe mit Unteraufgaben. Datum, ! und Kürzel gehören vor den Doppelpunkt, nach dem Doppelpunkt ist alles Unteraufgabe. Mindestens ein Semikolon nötig."]];
     return '<h2>Kürzel beim Erfassen</h2><p style="color:var(--muted);margin-top:0">Alles kann in einem Satz stehen. Unter dem Eingabefeld siehst du vor dem Enter, was erkannt wurde. Mit Umschalt+Enter speicherst du den Text unverändert.</p>' +
       '<p><b>Beispiel:</b> Steuerbescheid prüfen bis 15.11. am freitag !</p><table>' +
@@ -924,6 +991,7 @@ function zerlege(text, h, roh) {
     if (p.mandant) s += chip("Mandant: " + p.mandant, "mandant");
     if (p.projekt) s += chip("Projekt: " + p.projekt, "projekt");
     if (p.unter.length) s += chip(p.unter.length + (p.unter.length === 1 ? " Unteraufgabe" : " Unteraufgaben"), "gruen");
+    if (p.zeit) s += chip("Zeit " + fmtMin(p.zeit), "blau");
     el.innerHTML = s;
   }
   function hinzufuegen(roh) {
@@ -933,6 +1001,7 @@ function zerlege(text, h, roh) {
     var a = norm({ titel: p.titel, eingang: h, deadline: p.deadline, plan: p.plan, wichtig: p.wichtig, dringend: p.dringend, quelle: p.quelle,
       mandant: p.mandant, projekt: p.projekt, unter: p.unter.map(function (x) { return { titel: x }; }) });
     aufgaben.push(a); ui.neueId = a.id; $("neu").value = "";
+    if (p.zeit) zeitBuchen(p.zeit, h, a);
     speichern(); vorschau(); render();
     var sichtbar = (ui.tab === "heute") ? (a.plan && a.plan <= h) || (a.deadline && a.deadline <= h) : true;
     toast("Hinzugefügt" + (a.plan ? ": geplant " + anz(a.plan) : "") + (sichtbar ? "" : " (nicht in der Heute-Ansicht, siehe Woche oder Alle)"));
@@ -979,10 +1048,11 @@ function zerlege(text, h, roh) {
     if (akt === "dueber") { dateiUeberschreiben(); return; }
     if (akt === "iphlade") { iphoneLaden(); return; }
     if (akt === "ihgn") { iphoneIgnorieren(); return; }
+    if (zeitKlick(akt, ziel)) return;
     if (akt === "suchweg") { sucheLeeren(); render(); return; }
     if (akt === "rueck") { ui.rueck = 0; modal(rueckHtml()); return; }
     if (akt === "rnav") { var rd = +ziel.getAttribute("data-d"); ui.rueck = rd === 0 ? 0 : ui.rueck + rd; modal(rueckHtml()); return; }
-    if (akt === "rkopie") { kopiere(rueckText()); return; }
+    if (akt === "rkopie") { kopiere(rueckText(), "Rückblick kopiert."); return; }
     if (akt === "kalender") { modal(kalHtml()); return; }
     if (akt === "kalmachen") { kalMachen(); return; }
     if (akt === "papierkorb") { modal(papierkorbHtml()); return; }
@@ -1002,6 +1072,13 @@ function zerlege(text, h, roh) {
     if (!a) return;
 
     if (akt === "auf") { ui.offenId = (ui.offenId === id) ? null : id; render(); return; }
+    if (akt === "tstart") { timerStart({ aid: a.id, mandant: a.mandant, text: a.titel }); return; }
+    if (akt === "zb") { var zm = +ziel.getAttribute("data-min"), ze = zeitBuchen(zm, h, a); render(); gebuchtToast(ze); return; }
+    if (akt === "zadd") {
+      var zd = karte.querySelector("[data-zdn]").value || h, zmin = parseDauer(karte.querySelector("[data-zmn]").value);
+      if (!zmin) { toast("Zeit nicht erkannt. Beispiele: 30, 1:15, 1,5h."); return; }
+      var ze2 = zeitBuchen(zmin, zd, a); render(); gebuchtToast(ze2); return;
+    }
     if (akt === "uadd") { unterNeu(a); return; }
     if (akt === "uweg") { var uid = ziel.getAttribute("data-uid"); a.unter = a.unter.filter(function (x) { return x.id !== uid; }); speichern(); render(); return; }
     if (akt === "uok") {
@@ -1027,6 +1104,7 @@ function zerlege(text, h, roh) {
     else if (akt === "planplus") { a.plan = plusTage(a.plan, 1); pruefeLimit(a.plan); }
     else if (akt === "leer") a[ziel.getAttribute("data-feld")] = "";
     else if (akt === "loeschen") {
+      zeiten.forEach(function (z) { if (z.aid === a.id) { z.mandant = a.mandant; z.text = a.titel; } });
       aufgaben.splice(idx, 1); papierkorb.unshift({ a: a, am: h }); if (papierkorb.length > 50) papierkorb.pop();
       ui.offenId = null; speichern(); render();
       toast("Aufgabe im Papierkorb", "Rückgängig", function () {
@@ -1046,6 +1124,18 @@ function zerlege(text, h, roh) {
   document.addEventListener("change", function (e) {
     var u = e.target.getAttribute("data-ui");
     if (u) { ui[u] = e.target.value; ui.anim = true; render(); return; }
+    var dm = e.target.getAttribute("data-meta");
+    if (dm) { meta[dm] = e.target.value; speichern(); render(); return; }
+    var zdi = e.target.getAttribute("data-zd"), zmi = e.target.getAttribute("data-zm");
+    if (zdi || zmi) {
+      var ez = zeiten.filter(function (z) { return z.id === (zdi || zmi); })[0];
+      if (ez) {
+        if (zdi) { if (e.target.value) ez.datum = e.target.value; }
+        else { var nm = parseDauer(e.target.value); if (nm) ez.min = nm; else toast("Zeit nicht erkannt. Beispiele: 30, 1:15, 1,5h."); }
+        speichern(); render(); if ($("modal").classList.contains("sicht")) modal(zeditHtml());
+      }
+      return;
+    }
     var ut = e.target.getAttribute("data-ut");
     if (ut) {
       var kt = e.target.closest("[data-id]"), it = kt ? find(kt.getAttribute("data-id")) : -1; if (it < 0) return;
@@ -1083,6 +1173,262 @@ function zerlege(text, h, roh) {
     }
   });
 
+  /* ---------- Zeiterfassung ---------- */
+  function normZ(z) {
+    return { id: z.id || neueId(), datum: z.datum || "", min: Math.max(0, Math.round(+z.min || 0)), aid: z.aid || "",
+      mandant: String(z.mandant || "").trim(), text: String(z.text || "").trim(), ue: !!z.ue };
+  }
+  function zOk(z) { return z.datum && z.min > 0; }
+  function zeitenUebernehmen(d) { if (d && !Array.isArray(d) && Array.isArray(d.zeiten)) zeiten = d.zeiten.map(normZ).filter(zOk); }
+  function aufById(id) { for (var i = 0; i < aufgaben.length; i++) if (aufgaben[i].id === id) return aufgaben[i]; return null; }
+  function zInfo(z) { var a = z.aid ? aufById(z.aid) : null; return { mandant: a ? a.mandant : z.mandant, text: a ? a.titel : z.text }; }
+  function fmtMin(m) {
+    var f = meta.zformat || "hm";
+    if (f === "dez") return (m / 60).toFixed(2).replace(".", ",") + " h";
+    if (f === "min") return m + " Min";
+    return Math.floor(m / 60) + ":" + p2(m % 60) + " h";
+  }
+  function fmtZahl(m) {
+    var f = meta.zformat || "hm";
+    if (f === "dez") return (m / 60).toFixed(2).replace(".", ",");
+    if (f === "min") return String(m);
+    return Math.floor(m / 60) + ":" + p2(m % 60);
+  }
+  function hms(s) { return Math.floor(s / 3600) + ":" + p2(Math.floor(s % 3600 / 60)) + ":" + p2(s % 60); }
+  function zeitSumme(aid) { var s = 0; zeiten.forEach(function (z) { if (z.aid === aid) s += z.min; }); return s; }
+  function tagSumme(d) { var s = 0; zeiten.forEach(function (z) { if (z.datum === d) s += z.min; }); return s; }
+  function zeitBuchen(min, datum, a, frei) {
+    var e = normZ({ datum: datum, min: min, aid: a ? a.id : "", mandant: a ? a.mandant : (frei && frei.mandant) || "", text: a ? a.titel : (frei && frei.text) || "" });
+    zeiten.push(e); speichern(); return e;
+  }
+  function gebuchtToast(e) {
+    toast("+" + e.min + " Min gebucht · " + (e.datum === heute() ? "heute" : anz(e.datum)) + " gesamt " + fmtMin(tagSumme(e.datum)), "Rückgängig", function () {
+      zeiten = zeiten.filter(function (x) { return x.id !== e.id; }); speichern(); render();
+    });
+  }
+  /* Stoppuhr: ein Lauf zur selben Zeit, gespeichert als Startzeitpunkt (läuft auch bei geschlossener App korrekt weiter) */
+  function timerName(t) { var a = t.aid ? aufById(t.aid) : null; return (a ? a.titel : t.text) || "Zeit"; }
+  function timerStart(opt) {
+    if (meta.timer) timerStop(true);
+    meta.timer = { aid: opt.aid || "", mandant: opt.mandant || "", text: opt.text || "", start: new Date().toISOString() };
+    speichern(); render(); toast("Stoppuhr läuft: " + (opt.text || "Aufgabe"));
+  }
+  function timerStop(still) {
+    var t = meta.timer; if (!t) return;
+    var sek = Math.round((Date.now() - new Date(t.start).getTime()) / 1000), r = +meta.rundung || 15, min = Math.ceil(sek / 60);
+    meta.timer = null;
+    if (sek < 30) { speichern(); render(); if (!still) toast("Zu kurz, nichts gebucht."); return; }
+    min = r > 1 ? Math.max(r, Math.ceil(min / r) * r) : Math.max(1, min);
+    if (sek > 10 * 3600 && !still && !confirm("Die Stoppuhr lief " + hms(sek) + " (Std:Min:Sek). Wirklich " + fmtMin(min) + " buchen?")) { speichern(); render(); toast("Nichts gebucht."); return; }
+    var a = t.aid ? aufById(t.aid) : null, e = zeitBuchen(min, iso(new Date(t.start)), a, { mandant: t.mandant, text: t.text });
+    render(); gebuchtToast(e);
+  }
+  function renderTimer() {
+    var el = $("laeuft"), t = meta.timer;
+    if (!t) { el.innerHTML = ""; return; }
+    el.innerHTML = '<div class="laeuft"><span class="lp"></span><span class="lt">' + esc(timerName(t)) + '</span><b class="lz" id="lz">' + hms(Math.max(0, Math.round((Date.now() - new Date(t.start).getTime()) / 1000))) + '</b>' +
+      '<button class="knopf" data-akt="tstop">Stopp und buchen</button><button class="knopf" data-akt="tweg">Verwerfen</button></div>';
+  }
+  function zeitPille() {
+    var s = tagSumme(heute());
+    return '<button class="pille ' + (s ? "ok" : "warn") + '" data-akt="tab" data-t="zeit" title="Zur Zeiterfassung">Heute gebucht: ' + fmtMin(s) + '</button>';
+  }
+  function zeitZeile(a, o) {
+    if (o.kompakt) return "";
+    var lauf = meta.timer && meta.timer.aid === a.id, sum = zeitSumme(a.id);
+    var s = '<div class="zeitzeile">' + (lauf ? '<button class="zbtn lauf" data-akt="tstop" title="Stoppen und buchen">' + IC.stop + ' Stopp</button>' : '<button class="zbtn start" data-akt="tstart" title="Stoppuhr starten">' + IC.play + ' Start</button>');
+    [15, 30, 45, 60, 90].forEach(function (m) { s += '<button class="zbtn" data-akt="zb" data-min="' + m + '" title="' + m + ' Minuten heute buchen">+' + m + '</button>'; });
+    return s + (sum ? '<span class="zsumme">Gesamt ' + fmtMin(sum) + '</span>' : "") + '</div>';
+  }
+  function eintragRows(liste) {
+    return liste.map(function (z) {
+      return '<div class="urow"><input type="date" data-zd="' + z.id + '" value="' + z.datum + '"><input type="text" class="zmin" data-zm="' + z.id + '" value="' + Math.floor(z.min / 60) + ":" + p2(z.min % 60) + '" title="Zeit, z. B. 1:15, 75, 1,25h">' +
+        '<span style="flex:1;color:var(--muted);font-size:12px">' + (z.ue ? "übertragen" : "") + '</span><button class="ico klein" data-akt="zdel" data-zid="' + z.id + '" title="Buchung löschen">' + IC.x + '</button></div>';
+    }).join("");
+  }
+  function zeitDetails(a) {
+    var ez = zeiten.filter(function (z) { return z.aid === a.id; }).sort(function (p, q) { return p.datum < q.datum ? 1 : p.datum > q.datum ? -1 : 0; });
+    var sum = ez.reduce(function (s, z) { return s + z.min; }, 0);
+    return '<div class="zeitbox breit"><div class="ukopf"><span>Gebuchte Zeit</span><span>' + (ez.length ? fmtMin(sum) : "noch keine") + '</span></div>' + eintragRows(ez) +
+      '<div class="urow"><input type="date" data-zdn value="' + heute() + '"><input type="text" class="zmin" data-zmn placeholder="z. B. 30" title="Zeit, z. B. 30, 1:15, 1,5h"><button class="knopf" data-akt="zadd">Nachtragen</button></div></div>';
+  }
+  function zeditHtml() {
+    var ids = ui.zedit || [], ez = zeiten.filter(function (z) { return ids.indexOf(z.id) >= 0; }).sort(function (p, q) { return p.datum < q.datum ? -1 : 1; });
+    var i0 = ez.length ? zInfo(ez[0]) : { text: "", mandant: "" };
+    return '<h2>Buchungen</h2><p style="margin-top:0"><b>' + esc(i0.text) + '</b>' + (i0.mandant ? ' ' + chip(i0.mandant, "mandant") : "") + '</p>' +
+      (ez.length ? eintragRows(ez) : '<p class="zleer">Keine Buchungen mehr.</p>') + '<p class="zinfo">Datum und Zeit direkt ändern, Zeit z. B. als 1:15, 75 oder 1,25h. Mit ✕ löschst du eine Buchung.</p>';
+  }
+  function zPeriode() {
+    var h = heute();
+    if (ui.zmodus === "woche") { var mo = plusTage(montag(h), 7 * ui.zoffset), so = plusTage(mo, 6), k = isoKw(mo); return { von: mo, bis: so, titel: "KW " + k.kw, sub: anz(mo) + " bis " + anz(so), woche: true }; }
+    var d = plusTage(h, ui.zoffset); return { von: d, bis: d, titel: WD_LANG[wtag(d)], sub: anz(d), woche: false };
+  }
+  function zLinien(von, bis, nachMandant) {
+    var m = {}, arr = [];
+    zeiten.forEach(function (z) {
+      if (z.datum < von || z.datum > bis) return;
+      var i = zInfo(z), key = (nachMandant ? "" : z.datum) + "|" + i.mandant.toLowerCase() + "|" + i.text.toLowerCase(), l = m[key];
+      if (!l) { l = m[key] = { datum: nachMandant ? "" : z.datum, mandant: i.mandant, text: i.text, min: 0, offen: 0, ids: [] }; arr.push(l); }
+      l.min += z.min; if (!z.ue) l.offen += z.min; l.ids.push(z.id);
+    });
+    arr.sort(function (p, q) { return (p.datum + "|" + p.mandant.toLowerCase() + "|" + p.text.toLowerCase()) < (q.datum + "|" + q.mandant.toLowerCase() + "|" + q.text.toLowerCase()) ? -1 : 1; });
+    return arr;
+  }
+  function zLinie(l, mitDatum, ohneMandant) {
+    var fertig = l.offen === 0, teil = !fertig && l.offen < l.min, ids = l.ids.join(",");
+    return '<div class="zl' + (fertig ? " ue" : "") + '"><button class="uhaken' + (fertig ? " an" : "") + '" data-akt="zue" data-ids="' + ids + '" title="Als in DATEV übertragen markieren">' + IC.haken + '</button>' +
+      '<div class="zt" data-akt="zedit" data-ids="' + ids + '" title="Buchungen bearbeiten"><div class="titel">' + esc(l.text || "(ohne Text)") + '</div><div class="chips">' +
+      (mitDatum && l.datum ? chip(WD_KURZ[wtag(l.datum)] + " " + kurz(l.datum), "grau") : "") + (ohneMandant ? "" : l.mandant ? chip(l.mandant, "mandant") : chip("ohne Mandant", "grau")) +
+      (teil ? chip("noch offen: " + fmtMin(l.offen), "orange") : "") + '</div></div><div class="zz">' + fmtMin(l.min) + '</div>' +
+      '<button class="ico klein" data-akt="zcp" data-text="' + esc(l.text) + '" title="Aufgabentext kopieren">' + IC.kopie + '</button></div>';
+  }
+  function zKopf(t, summe, extra) {
+    return '<div class="gruppe g-plan"><span class="punkt"></span>' + t + '<span class="n">' + fmtMin(summe) + '</span>' + (extra || "") + '</div>';
+  }
+  function zVorschlaege(von, bis) {
+    var h = heute(), hat = {}, l = [];
+    zeiten.forEach(function (z) { if (z.aid && z.datum >= von && z.datum <= bis) hat[z.aid] = 1; });
+    aufgaben.forEach(function (a) {
+      if (hat[a.id] || a.ohneZeit) return;
+      var tag = "";
+      if (a.erledigt && a.erledigtAm >= von && a.erledigtAm <= bis) tag = a.erledigtAm;
+      else if (!a.erledigt && a.plan && a.plan >= von && a.plan <= bis && a.plan <= h) tag = a.plan;
+      if (tag) l.push({ a: a, tag: tag });
+    });
+    return l.sort(function (p, q) { return p.tag < q.tag ? -1 : 1; });
+  }
+  function zeitHtml() {
+    var P = zPeriode(), h = heute(), s = "", lin = zLinien(P.von, P.bis, false), ges = 0, off = 0, gr = ui.zgruppe || "tag";
+    lin.forEach(function (l) { ges += l.min; off += l.offen; });
+    var opt = function (arr, cur) { return arr.map(function (o) { return '<option value="' + o[0] + '"' + (String(cur) === String(o[0]) ? " selected" : "") + '>' + o[1] + '</option>'; }).join(""); };
+    s += '<div class="zkopf"><button class="fchip' + (!P.woche ? " an" : "") + '" data-akt="zmodus" data-m="tag">Tag</button><button class="fchip' + (P.woche ? " an" : "") + '" data-akt="zmodus" data-m="woche">Woche</button>' +
+      '<button class="ico" data-akt="znav" data-d="-1" title="Zurück">' + IC.links + '</button><div><div class="titelw" style="font-size:18px;font-weight:700">' + P.titel + '</div><div class="datumw" style="color:var(--muted);font-size:14px">' + P.sub + '</div></div>' +
+      '<button class="ico" data-akt="znav" data-d="1" title="Weiter">' + IC.rechts + '</button><button class="fchip" data-akt="znav" data-d="0">' + (P.woche ? "Diese Woche" : "Heute") + '</button></div>';
+    s += '<div class="filter"><label>Anzeigen als <select data-ui="zgruppe">' + opt([["tag", "Nach Tag"], ["mandant", "Nach Mandant"], ["datev", "Liste für DATEV"]], gr) + '</select></label>' +
+      '</div><details class="zset"><summary>Einstellungen (Zeitformat, Rundung, Tagesziel)</summary><div class="filter" style="margin-top:8px">' + '<label>Zeitformat <select data-meta="zformat">' + opt([["hm", "Std:Min (1:15)"], ["dez", "Dezimal (1,25)"], ["min", "Minuten (75)"]], meta.zformat || "hm") + '</select></label>' +
+      '<label>Stoppuhr rundet auf <select data-meta="rundung">' + opt([["15", "15 Minuten"], ["5", "5 Minuten"], ["1", "1 Minute"]], meta.rundung || "15") + '</select></label>' +
+      '<label>Tagesziel <select data-meta="soll">' + opt([["0", "aus"], ["4", "4 Std"], ["6", "6 Std"], ["7", "7 Std"], ["7.5", "7,5 Std"], ["8", "8 Std"], ["9", "9 Std"]], meta.soll || "0") + '</select></label></div></details>';
+    s += '<div class="rk-kacheln"><div class="rk-k"><b>' + fmtMin(ges) + '</b>gebucht</div><div class="rk-k gruen"><b>' + fmtMin(ges - off) + '</b>in DATEV übertragen</div><div class="rk-k' + (off ? " rot" : "") + '"><b>' + fmtMin(off) + '</b>noch zu übertragen</div></div>';
+    /* Zeit ohne Aufgabe */
+    var tagF = P.woche ? (h >= P.von && h <= P.bis ? h : P.von) : P.von;
+    s += '<div class="zfrei"><div class="tit">Zeit ohne Aufgabe (Telefonat, Besprechung …)</div><div class="zr"><input type="text" id="zf_m" list="dlm" autocomplete="off" placeholder="Mandant" value="' + esc(ui.zfm || "") + '"><input type="text" id="zf_t" autocomplete="off" placeholder="Tätigkeit, z. B. Telefonat"><input type="date" id="zf_d" value="' + tagF + '"></div>' +
+      '<div class="zr">' + [15, 30, 45, 60, 90].map(function (m) { return '<button class="zbtn" data-akt="zfrei" data-min="' + m + '">+' + m + '</button>'; }).join("") +
+      '<input type="text" id="zf_min" autocomplete="off" placeholder="oder Zeit, z. B. 20 oder 1,5h" style="max-width:180px"><button class="knopf" data-akt="zfrei" data-min="0">Buchen</button><button class="zbtn start" data-akt="zfstart">' + IC.play + ' Stoppuhr</button></div></div>' + datalist("dlm", "mandant");
+    /* Vorschläge */
+    var vor = zVorschlaege(P.von, P.bis);
+    if (vor.length) {
+      s += '<div class="gruppe g-liegen"><span class="punkt"></span>Ohne Zeitbuchung<span class="n">' + vor.length + '</span></div><div class="zinfo">Erledigt oder für diesen Zeitraum geplant, aber ohne gebuchte Zeit. Ein Klick bucht die Zeit auf den genannten Tag.</div>';
+      vor.forEach(function (v) {
+        s += '<div class="zvor"><div class="t">' + esc(v.a.titel) + ' ' + (v.a.mandant ? chip(v.a.mandant, "mandant") : "") + chip((v.a.erledigt ? "erledigt " : "geplant ") + WD_KURZ[wtag(v.tag)] + " " + kurz(v.tag), "grau") + '</div><div class="b">' +
+          [15, 30, 45, 60, 90].map(function (m) { return '<button class="zbtn" data-akt="zfix" data-aid="' + v.a.id + '" data-tag="' + v.tag + '" data-min="' + m + '">+' + m + '</button>'; }).join("") +
+          '<button class="zbtn" data-akt="zohne" data-aid="' + v.a.id + '" title="Für diese Aufgabe keine Zeit erfassen">ohne Zeit</button></div></div>';
+      });
+    }
+    /* Liste */
+    if (!lin.length) s += '<div class="zleer">In diesem Zeitraum ist noch keine Zeit gebucht.</div>';
+    if (gr === "tag") {
+      for (var d = P.von; d <= P.bis; d = plusTage(d, 1)) {
+        var dl = lin.filter(function (l) { return l.datum === d; }), ds = tagSumme(d), soll = +meta.soll || 0, wt = wtag(d), extra = "";
+        if (!dl.length && (wt > 4 || d > h)) continue;
+        if (soll && wt < 5 && d <= h && ds < soll * 60) extra = chip("bis Tagesziel fehlen " + fmtMin(Math.round(soll * 60 - ds)), "orange");
+        s += zKopf(WD_LANG[wt] + ", " + anz(d), ds, extra);
+        if (!dl.length) s += '<div class="zleer">Nichts gebucht.</div>';
+        dl.forEach(function (l) { s += zLinie(l, false); });
+      }
+    } else if (gr === "mandant") {
+      var lm = zLinien(P.von, P.bis, true), grp = {}, order = [];
+      lm.forEach(function (l) { var k = l.mandant || "ohne Mandant"; if (!grp[k]) { grp[k] = []; order.push(k); } grp[k].push(l); });
+      order.sort(function (x, y) { return x.localeCompare(y, "de"); }).forEach(function (k) {
+        var sm = grp[k].reduce(function (q, l) { return q + l.min; }, 0);
+        s += zKopf(esc(k), sm); grp[k].forEach(function (l) { s += zLinie(l, false, true); });
+      });
+    } else {
+      lin.forEach(function (l) { s += zLinie(l, true); });
+    }
+    s += '<div class="zexport"><button class="knopf" data-akt="zcopy" data-f="liste">Liste kopieren</button><button class="knopf" data-akt="zcopy" data-f="tsv">Tabelle kopieren</button><button class="knopf" data-akt="zcsv">CSV-Datei</button>' +
+      '<button class="knopf" data-akt="zalleue">Alles als übertragen markieren</button><button class="knopf" data-akt="zalleoffen">Markierungen zurücksetzen</button></div>' +
+      '<div class="zinfo">Ein Haken in einer Zeile merkt dir, dass du sie in DATEV eingetragen hast. Ein Klick auf den Namen öffnet die einzelnen Buchungen zum Korrigieren.</div>';
+    return s;
+  }
+  function zeitListeText() {
+    var P = zPeriode(), gr = ui.zgruppe || "tag", t = ["Zeiterfassung " + (P.woche ? P.titel + " (" + P.sub + ")" : P.titel + ", " + P.sub), ""], lin = zLinien(P.von, P.bis, false), ges = 0;
+    function zl(l, pre) { return "- " + (pre || "") + (l.mandant || "ohne Mandant") + " · " + (l.text || "(ohne Text)") + " · " + fmtMin(l.min); }
+    lin.forEach(function (l) { ges += l.min; });
+    if (gr === "mandant") {
+      var lm = zLinien(P.von, P.bis, true), g = {};
+      lm.forEach(function (l) { var k = l.mandant || "ohne Mandant"; (g[k] = g[k] || []).push(l); });
+      Object.keys(g).sort(function (a, b) { return a.localeCompare(b, "de"); }).forEach(function (k) {
+        t.push(k + " (" + fmtMin(g[k].reduce(function (q, l) { return q + l.min; }, 0)) + ")");
+        g[k].forEach(function (l) { t.push("- " + (l.text || "(ohne Text)") + " · " + fmtMin(l.min)); });
+        t.push("");
+      });
+    } else if (gr === "datev") {
+      lin.forEach(function (l) { t.push(zl(l, WD_KURZ[wtag(l.datum)] + " " + kurz(l.datum) + " · ")); });
+    } else {
+      for (var d = P.von; d <= P.bis; d = plusTage(d, 1)) {
+        var dl = lin.filter(function (l) { return l.datum === d; });
+        if (!dl.length) continue;
+        t.push(WD_LANG[wtag(d)] + ", " + anz(d) + " (" + fmtMin(tagSumme(d)) + ")");
+        dl.forEach(function (l) { t.push(zl(l)); });
+        t.push("");
+      }
+    }
+    t.push("Gesamt: " + fmtMin(ges));
+    return t.join("\n");
+  }
+  function zeitTabelle(trenn, mitMin) {
+    var P = zPeriode(), lin = zLinien(P.von, P.bis, false);
+    function q(x) { x = String(x); return trenn === ";" ? '"' + x.replace(/"/g, '""') + '"' : x.replace(/[\t\r\n]+/g, " "); }
+    var z = [["Datum", "Mandant", "Aufgabe", "Zeit"].concat(mitMin ? ["Minuten", "Übertragen"] : []).map(q).join(trenn)];
+    lin.forEach(function (l) { z.push([anz(l.datum), l.mandant, l.text, fmtZahl(l.min)].concat(mitMin ? [l.min, l.offen === 0 ? "ja" : l.offen < l.min ? "teilweise" : "nein"] : []).map(q).join(trenn)); });
+    return z.join(trenn === ";" ? "\r\n" : "\n");
+  }
+  function zeitKlick(akt, ziel) {
+    var h = heute(), ids;
+    if (akt === "zmodus") { ui.zmodus = ziel.getAttribute("data-m"); ui.zoffset = 0; render(); return true; }
+    if (akt === "znav") { var d = +ziel.getAttribute("data-d"); ui.zoffset = d === 0 ? 0 : ui.zoffset + d; render(); return true; }
+    if (akt === "zue") {
+      ids = ziel.getAttribute("data-ids").split(",");
+      var sel = zeiten.filter(function (z) { return ids.indexOf(z.id) >= 0; }), alle = sel.every(function (z) { return z.ue; });
+      sel.forEach(function (z) { z.ue = !alle; }); speichern(); render(); return true;
+    }
+    if (akt === "zedit") { ui.zedit = ziel.getAttribute("data-ids").split(","); modal(zeditHtml()); return true; }
+    if (akt === "zcp") { kopiere(ziel.getAttribute("data-text"), "Aufgabentext kopiert."); return true; }
+    if (akt === "zcopy") { kopiere(ziel.getAttribute("data-f") === "tsv" ? zeitTabelle("\t", false) : zeitListeText(), "Kopiert."); return true; }
+    if (akt === "zcsv") {
+      var P = zPeriode();
+      ausgeben("zeiten-" + P.von + (P.woche ? "-bis-" + P.bis : "") + ".csv", "text/csv;charset=utf-8", "﻿" + zeitTabelle(";", true), "CSV-Datei erzeugt.");
+      return true;
+    }
+    if (akt === "zalleue" || akt === "zalleoffen") {
+      var P2 = zPeriode(), n = 0;
+      if (akt === "zalleue" && !confirm("Alle Buchungen dieses Zeitraums als in DATEV übertragen markieren?")) return true;
+      zeiten.forEach(function (z) { if (z.datum >= P2.von && z.datum <= P2.bis && z.ue !== (akt === "zalleue")) { z.ue = akt === "zalleue"; n++; } });
+      speichern(); render(); toast(n + " Buchung" + (n === 1 ? "" : "en") + (akt === "zalleue" ? " als übertragen markiert." : " zurückgesetzt.")); return true;
+    }
+    if (akt === "zfix") {
+      var a = aufById(ziel.getAttribute("data-aid")); if (!a) return true;
+      var e = zeitBuchen(+ziel.getAttribute("data-min"), ziel.getAttribute("data-tag"), a); render(); gebuchtToast(e); return true;
+    }
+    if (akt === "zohne") { var a2 = aufById(ziel.getAttribute("data-aid")); if (a2) { a2.ohneZeit = true; speichern(); render(); toast("Für \"" + a2.titel + "\" wird keine Zeit mehr vorgeschlagen."); } return true; }
+    if (akt === "zfrei" || akt === "zfstart") {
+      var mandant = $("zf_m").value.trim(), text = $("zf_t").value.trim(), datum = $("zf_d").value || h;
+      ui.zfm = mandant;
+      if (!text) { toast("Bitte eine Tätigkeit angeben, z. B. Telefonat."); $("zf_t").focus(); return true; }
+      if (akt === "zfstart") { timerStart({ mandant: mandant, text: text }); return true; }
+      var min = +ziel.getAttribute("data-min") || parseDauer($("zf_min").value);
+      if (!min) { toast("Zeit nicht erkannt. Beispiele: 20, 1:15, 1,5h."); $("zf_min").focus(); return true; }
+      var e2 = zeitBuchen(min, datum, null, { mandant: mandant, text: text }); render(); gebuchtToast(e2); return true;
+    }
+    if (akt === "zdel") {
+      var zid = ziel.getAttribute("data-zid"); zeiten = zeiten.filter(function (z) { return z.id !== zid; }); speichern(); render();
+      if ($("modal").classList.contains("sicht")) modal(zeditHtml()); return true;
+    }
+    if (akt === "tstop") { timerStop(false); return true; }
+    if (akt === "tweg") { if (confirm("Stoppuhr verwerfen? Es wird nichts gebucht.")) { meta.timer = null; speichern(); render(); } return true; }
+    return false;
+  }
+
   /* ---------- Wochenrückblick ---------- */
   function rueckDaten() {
     var h = heute(), mo = plusTage(montag(h), 7 * ui.rueck), so = plusTage(mo, 6);
@@ -1094,7 +1440,8 @@ function zerlege(text, h, roh) {
       var d = a.deadline, p = a.plan;
       return (d && d >= mo && d <= so && d < h) || (p && p >= mo && p <= so && p < h);
     });
-    return { mo: mo, so: so, kw: isoKw(mo), erl: erl, neu: neu, nicht: nicht };
+    var zmin = 0; zeiten.forEach(function (z) { if (z.datum >= mo && z.datum <= so) zmin += z.min; });
+    return { mo: mo, so: so, kw: isoKw(mo), erl: erl, neu: neu, nicht: nicht, zmin: zmin };
   }
   function rueckHtml() {
     var r = rueckDaten(), s = '<h2>Wochenrückblick</h2><div class="wochenkopf"><button class="ico" data-akt="rnav" data-d="-1" title="Vorherige Woche">' + IC.links + '</button>' +
@@ -1102,6 +1449,7 @@ function zerlege(text, h, roh) {
       '<button class="ico" data-akt="rnav" data-d="1" title="Nächste Woche">' + IC.rechts + '</button><button class="fchip" data-akt="rnav" data-d="0">Diese Woche</button></div>';
     s += '<div class="rk-kacheln"><div class="rk-k gruen"><b>' + r.erl.length + '</b>erledigt</div><div class="rk-k"><b>' + r.neu.length + '</b>neu erfasst</div>' +
       '<div class="rk-k' + (r.nicht.length ? " rot" : "") + '"><b>' + r.nicht.length + '</b>nicht geschafft</div></div>';
+    if (r.zmin) s += '<p class="rk-leer">Gebuchte Zeit in dieser Woche: ' + fmtMin(r.zmin) + '</p>';
     s += '<h3>Erledigt</h3>';
     if (!r.erl.length) s += '<p class="rk-leer">In dieser Woche wurde nichts abgehakt.</p>';
     var tag = "";
@@ -1131,16 +1479,18 @@ function zerlege(text, h, roh) {
     r.nicht.forEach(function (a) { z.push("- " + a.titel + (a.mandant ? " [" + a.mandant + "]" : "") + (a.deadline ? ", Deadline " + anz(a.deadline) : "") + (a.plan ? ", geplant " + anz(a.plan) : "")); });
     if (!r.nicht.length) z.push("- (nichts)");
     z.push("", "Neu erfasst: " + r.neu.length);
+    if (r.zmin) z.push("Gebuchte Zeit: " + fmtMin(r.zmin));
     return z.join("\n");
   }
-  function kopiere(text) {
+  function kopiere(text, msg) {
+    msg = msg || "Kopiert.";
     function alt() {
       var ta = document.createElement("textarea"), ok = false;
       ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select();
       try { ok = document.execCommand("copy"); } catch (e) {}
-      document.body.removeChild(ta); toast(ok ? "Rückblick kopiert." : "Kopieren war nicht möglich.");
+      document.body.removeChild(ta); toast(ok ? msg : "Kopieren war nicht möglich.");
     }
-    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(function () { toast("Rückblick kopiert."); }, alt); else alt();
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(function () { toast(msg); }, alt); else alt();
   }
 
   /* ---------- Kalenderexport (.ics) ---------- */
@@ -1190,7 +1540,7 @@ function zerlege(text, h, roh) {
     var r = icsText({ dl: $("kal_dl").checked, plan: $("kal_plan").checked, mandant: $("kal_m").checked });
     if (!r.n) { toast("Keine passenden offenen Aufgaben."); return; }
     modalZu();
-    ausgeben("aufgaben-kalender-" + heute() + ".ics", "text/calendar;charset=utf-8", r.text, r.n + (r.n === 1 ? " Termin" : " Termine") + " exportiert.");
+    ausgeben("aufgaben-kalender-" + heute() + ".ics", "text/calendar;charset=utf-8", r.text, r.n + (r.n === 1 ? " Termin" : " Termine") + " exportiert. Öffne die Datei, um sie in den Kalender zu übernehmen.");
   }
 
   /* ---------- Gemeinsamer Ordner (Edge/Chrome am Computer) ---------- */
@@ -1199,7 +1549,7 @@ function zerlege(text, h, roh) {
   var DFILE = "aufgaben-daten.json";
   var FSA = typeof window.showDirectoryPicker === "function" && typeof indexedDB !== "undefined";
   var datei = { dir: null, status: "aus", zeit: null, frisch: false, iphone: null }, dTimer = null, dSchreibt = false, dNochmal = false;
-  function sicherungText(stamp) { return JSON.stringify({ version: 3, aufgaben: aufgaben, papierkorb: papierkorb, gesichert: stamp || new Date().toISOString(), basis: meta.basis || "" }, null, 2); }
+  function sicherungText(stamp) { return JSON.stringify({ version: 3, aufgaben: aufgaben, papierkorb: papierkorb, zeiten: zeiten, gesichert: stamp || new Date().toISOString(), basis: meta.basis || "" }, null, 2); }
   function zeitText(stamp) { var d = new Date(stamp); return anz(iso(d)) + " " + p2(d.getHours()) + ":" + p2(d.getMinutes()); }
   function idb(fn) {
     return new Promise(function (res, rej) {
@@ -1301,6 +1651,7 @@ function zerlege(text, h, roh) {
       if (!confirm(frage)) return;
       aufgaben = neu.map(norm);
       if (Array.isArray(d.papierkorb)) papierkorb = d.papierkorb.map(function (e) { return { a: norm(e.a || e), am: e.am || "" }; });
+      zeitenUebernehmen(d);
       meta.iphoneStand = ip.stamp; datei.iphone = null; ui.offenId = null; ui.anim = true;
       speichern(); render(); toast(aufgaben.length + " Aufgaben vom iPhone geladen.");
       setTimeout(function () { iphoneAufraeumen(ip.stamp); }, 150);
@@ -1351,6 +1702,7 @@ function zerlege(text, h, roh) {
       if (!confirm("Das ersetzt alle aktuellen Aufgaben (" + aufgaben.length + ") auf diesem PC durch " + neu.length + " Aufgaben aus der Datei. Fortfahren?")) return;
       aufgaben = neu.map(norm);
       if (!Array.isArray(d) && Array.isArray(d.papierkorb)) papierkorb = d.papierkorb.map(function (e) { return { a: norm(e.a || e), am: e.am || "" }; });
+      zeitenUebernehmen(d);
       meta.dateiStand = d.gesichert || ""; datei.status = "bereit"; ui.offenId = null; ui.anim = true;
       speichern(); render(); toast(aufgaben.length + " Aufgaben aus der Datei geladen.");
     }).catch(function (err) { alert("Die Datei konnte nicht gelesen werden: " + (err && err.message ? err.message : err)); });
@@ -1403,7 +1755,7 @@ function zerlege(text, h, roh) {
     l.href = URL.createObjectURL(blob); l.download = name;
     document.body.appendChild(l); l.click(); document.body.removeChild(l);
     setTimeout(function () { URL.revokeObjectURL(l.href); }, 1000);
-    toast(meldung + " Öffne die Datei, um sie in den Kalender zu übernehmen.");
+    toast(meldung);
   }
 
   function sichern() {
@@ -1437,6 +1789,7 @@ function zerlege(text, h, roh) {
         if (!confirm("Wiederherstellen ersetzt alle aktuellen Aufgaben (" + aufgaben.length + ") durch " + neu.length + " Aufgaben aus der Datei. Fortfahren?")) { dat_.value = ""; return; }
         aufgaben = neu.map(norm); meta.basis = (!Array.isArray(d) && d.gesichert) || "";
         if (!Array.isArray(d) && Array.isArray(d.papierkorb)) papierkorb = d.papierkorb.map(function (e) { return { a: norm(e.a || e), am: e.am || "" }; });
+      zeitenUebernehmen(d);
         ui.offenId = null; speichern(); ui.anim = true; render(); toast(aufgaben.length + " Aufgaben wiederhergestellt.");
       } catch (err) { alert("Die Datei konnte nicht gelesen werden: " + err.message); }
       dat_.value = "";
@@ -1445,6 +1798,7 @@ function zerlege(text, h, roh) {
   });
 
   dateiInit();
+  setInterval(function () { var z = $("lz"); if (z && meta.timer) z.textContent = hms(Math.max(0, Math.round((Date.now() - new Date(meta.timer.start).getTime()) / 1000))); }, 1000);
   vorschau(); render();
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
   if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
