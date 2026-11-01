@@ -1274,18 +1274,20 @@ function zerlege(text, h, roh) {
   }
   async function iphoneSuchen() {
     if (!datei.dir || datei.status === "aus" || datei.status === "erlaubnis") return;
-    var best = null;
+    var best = null, alle = [];
     try {
       for await (var e of datei.dir.entries()) {
         var name = e[0], h = e[1];
         if (h.kind !== "file" || !/^aufgaben-iphone.*\.json$/i.test(name)) continue;
         var j;
         try { j = JSON.parse(await (await h.getFile()).text()); } catch (x) { continue; }
-        if (!j || !j.gesichert || !Array.isArray(j.aufgaben) || j.gesichert <= (meta.iphoneStand || "")) continue;
+        if (!j || !j.gesichert || !Array.isArray(j.aufgaben)) continue;
+        alle.push({ name: name, stamp: j.gesichert });
+        if (j.gesichert <= (meta.iphoneStand || "")) continue;
         if (!best || j.gesichert > best.stamp) best = { name: name, handle: h, stamp: j.gesichert, anzahl: j.aufgaben.length, basis: j.basis || "" };
       }
     } catch (err) { return; }
-    datei.iphone = best; renderKopf();
+    datei.iphone = best; datei.iphoneAlle = alle; renderKopf();
   }
   function iphoneLaden() {
     var ip = datei.iphone; if (!ip) return;
@@ -1301,7 +1303,20 @@ function zerlege(text, h, roh) {
       if (Array.isArray(d.papierkorb)) papierkorb = d.papierkorb.map(function (e) { return { a: norm(e.a || e), am: e.am || "" }; });
       meta.iphoneStand = ip.stamp; datei.iphone = null; ui.offenId = null; ui.anim = true;
       speichern(); render(); toast(aufgaben.length + " Aufgaben vom iPhone geladen.");
+      setTimeout(function () { iphoneAufraeumen(ip.stamp); }, 150);
     }).catch(function (err) { alert("Die iPhone-Datei konnte nicht gelesen werden: " + (err && err.message ? err.message : err)); });
+  }
+  function iphoneAufraeumen(stamp) {
+    var weg = (datei.iphoneAlle || []).filter(function (x) { return x.stamp <= stamp; });
+    if (!weg.length || !datei.dir) return;
+    var namen = weg.slice(0, 6).map(function (x) { return "- " + x.name; }).join("\n") + (weg.length > 6 ? "\n- … und " + (weg.length - 6) + " weitere" : "");
+    if (!confirm("Aufräumen: Die geladene iPhone-Sicherung und ältere (" + weg.length + " Datei" + (weg.length === 1 ? "" : "en") + ") aus dem Ordner \"" + datei.dir.name + "\" löschen?\n\n" + namen +
+      "\n\nGelöscht werden nur Dateien, die mit \"aufgaben-iphone-\" beginnen. " + DFILE + " bleibt erhalten. Das lässt sich nicht rückgängig machen.")) return;
+    Promise.all(weg.map(function (x) { return datei.dir.removeEntry(x.name).then(function () { return null; }, function (err) { return x.name + ": " + (err && err.message ? err.message : err); }); })).then(function (fehler) {
+      fehler = fehler.filter(Boolean);
+      datei.iphoneAlle = (datei.iphoneAlle || []).filter(function (x) { return x.stamp > stamp; });
+      toast(fehler.length ? "Nicht alles gelöscht: " + fehler[0] : (weg.length === 1 ? "1 Datei gelöscht." : weg.length + " Dateien gelöscht."));
+    });
   }
   function iphoneIgnorieren() {
     if (!datei.iphone) return;
