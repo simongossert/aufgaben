@@ -321,6 +321,28 @@ button.pille { font: inherit; font-size: 12.5px; font-weight: 600; color: inheri
 .zft { border: 1px solid var(--line); background: #fff; border-radius: 12px; padding: 6px 0; display: grid; place-items: center; gap: 2px; font-size: 12px; color: var(--muted); font-weight: 600; }
 .zft b { font-size: 22px; line-height: 1.1; color: var(--ink); }
 .zft:hover { background: #f5f3ff; border-color: var(--a1); }
+
+/* ---------- Feier beim Abhaken ---------- */
+.feier { position: fixed; inset: 0; z-index: 65; pointer-events: none; display: grid; place-items: center; overflow: hidden; animation: fein .25s ease-out both;
+  background: radial-gradient(circle at 50% 50%, rgba(30,27,75,.8), rgba(30,27,75,.55) 62%, rgba(30,27,75,.32)); }
+.feier.aus { animation: faus .65s ease-in forwards; }
+@keyframes fein { from { opacity: 0; } to { opacity: 1; } }
+@keyframes faus { to { opacity: 0; } }
+.feier canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.fstrahlen { position: absolute; width: 170vmax; height: 170vmax; left: 50%; top: 50%; margin: -85vmax 0 0 -85vmax;
+  background: repeating-conic-gradient(from 0deg, rgba(255,214,102,.26) 0 6deg, transparent 6deg 18deg);
+  -webkit-mask-image: radial-gradient(circle, #000 0, transparent 52%); mask-image: radial-gradient(circle, #000 0, transparent 52%); animation: dreh 9s linear infinite; }
+@keyframes dreh { to { transform: rotate(360deg); } }
+.fz { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1vmin; padding: 0 16px; text-align: center; }
+.ftext { font-size: clamp(30px, 9vw, 80px); font-weight: 900; letter-spacing: -.01em; line-height: 1.12; color: #fff;
+  text-shadow: 0 0 18px rgba(255,214,102,.95), 0 0 44px rgba(236,72,153,.85), 0 4px 0 rgba(0,0,0,.28); }
+.ftext .w { display: inline-block; white-space: nowrap; }
+.ftext .w span { display: inline-block; animation: fbuchst .7s cubic-bezier(.2,1.6,.3,1) both; animation-delay: calc(var(--i) * 45ms + .5s); }
+@keyframes fbuchst { from { opacity: 0; transform: translateY(46px) scale(.2) rotate(-14deg); } to { opacity: 1; transform: none; } }
+.fdaumen { font-size: clamp(150px, 62vmin, 400px); line-height: 1; filter: drop-shadow(0 14px 34px rgba(255,200,0,.75));
+  animation: fdaumen 1.1s cubic-bezier(.2,1.7,.3,1) 1.45s both, fwackel 1.3s ease-in-out 2.6s infinite; }
+@keyframes fdaumen { from { opacity: 0; transform: scale(0) rotate(-40deg); } to { opacity: 1; transform: none; } }
+@keyframes fwackel { 50% { transform: scale(1.12) rotate(-6deg); } }
 @media (max-width: 560px) { .suche { max-width: none; flex-basis: 100%; margin-top: 12px; } }
 @media (max-width: 760px) {
   .kacheln { grid-template-columns: repeat(2, 1fr); }
@@ -1108,14 +1130,14 @@ function zerlege(text, h, roh) {
       a.unter.forEach(function (x) { if (x.id === uid2) x.erledigt = !x.erledigt; });
       speichern(); render();
       if (a.unter.length && !a.erledigt && a.unter.every(function (x) { return x.erledigt; })) {
-        toast("Alle Unteraufgaben sind erledigt.", "Aufgabe abhaken", function () { a.erledigt = true; a.erledigtAm = heute(); speichern(); render(); zfFrage(a); });
+        toast("Alle Unteraufgaben sind erledigt.", "Aufgabe abhaken", function () { a.erledigt = true; a.erledigtAm = heute(); speichern(); render(); feier(); zfFrage(a); });
       }
       return;
     }
     if (akt === "erledigt") {
       a.erledigt = !a.erledigt; a.erledigtAm = a.erledigt ? h : "";
       speichern();
-      if (a.erledigt) zfFrage(a);
+      if (a.erledigt) { feier(); zfFrage(a); }
       var hk = karte.querySelector(".haken");
       if (a.erledigt) { hk.classList.add("pop"); if (ui.status === "offen" || ui.tab === "heute") karte.classList.add("abgehakt"); }
       setTimeout(render, a.erledigt ? 420 : 0); return;
@@ -1456,6 +1478,73 @@ function zerlege(text, h, roh) {
     return false;
   }
 
+  /* ---------- Feier beim Abhaken ---------- */
+  var feierRaf = 0, feierTimer = 0;
+  function feier() {
+    if (meta.feier === "aus") return;
+    var alt = $("feier"); if (alt) alt.remove();
+    cancelAnimationFrame(feierRaf); clearTimeout(feierTimer);
+    var ruhig = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches, i = 0;
+    var txt = "Rü ist stolz auf dich!".split(" ").map(function (w) {
+      return '<span class="w">' + Array.from(w).map(function (ch) { return '<span style="--i:' + (i++) + '">' + ch + '</span>'; }).join("") + '</span>';
+    }).join(" ");
+    var el = document.createElement("div"); el.id = "feier"; el.className = "feier";
+    el.innerHTML = (ruhig ? "" : '<div class="fstrahlen"></div><canvas></canvas><canvas></canvas>') + '<div class="fz"><div class="ftext">' + txt + '</div><div class="fdaumen">👍</div></div>';
+    document.body.appendChild(el);
+    var dauer = ruhig ? 2600 : 4800;
+    if (!ruhig) { var cs = el.querySelectorAll("canvas"); feuerwerk(cs[0], cs[1], dauer - 300); }
+    feierTimer = setTimeout(function () {
+      el.className = "feier aus";
+      setTimeout(function () { el.remove(); cancelAnimationFrame(feierRaf); }, 700);
+    }, dauer);
+  }
+  function feuerwerk(cf, ck, dauer) {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2), B = innerWidth, H = innerHeight;
+    cf.width = ck.width = Math.round(B * dpr); cf.height = ck.height = Math.round(H * dpr);
+    var c = cf.getContext("2d"), k = ck.getContext("2d"); c.scale(dpr, dpr); k.scale(dpr, dpr);
+    var funken = [], konf = [], t0 = performance.now(), last = t0, naechster = 0;
+    var farben = ["#ffd166", "#ef476f", "#06d6a0", "#4cc9f0", "#f78c6b", "#c77dff", "#ffffff", "#ffe66d"];
+    function rakete(x, y) {
+      var h = Math.random() * 360, n = 95 + Math.floor(Math.random() * 55), ring = Math.random() < .35, bunt = Math.random() > .7;
+      for (var j = 0; j < n; j++) {
+        var w = Math.PI * 2 * j / n + Math.random() * .08, v = (ring ? 5.2 : 1.6 + Math.random() * 5.6) * (.85 + Math.random() * .3);
+        funken.push({ x: x, y: y, vx: Math.cos(w) * v, vy: Math.sin(w) * v, a: 1, z: 1.3 + Math.random() * 2.2, h: bunt ? h + Math.random() * 90 : h, zerfall: .007 + Math.random() * .01 });
+      }
+    }
+    function konfetti(n, x, y, kanone) {
+      for (var j = 0; j < n; j++) konf.push({ x: x === undefined ? Math.random() * B : x, y: y === undefined ? -20 - Math.random() * H * .25 : y,
+        vx: kanone ? (kanone > 0 ? -1 : 1) * (2 + Math.random() * 7) : (Math.random() - .5) * 2, vy: kanone ? -(9 + Math.random() * 10) : 2 + Math.random() * 3,
+        r: Math.random() * 6.28, vr: (Math.random() - .5) * .35, b: 6 + Math.random() * 7, f: farben[Math.floor(Math.random() * farben.length)] });
+    }
+    rakete(B / 2, H * .32); konfetti(40, 0, H, -1); konfetti(40, B, H, 1); konfetti(50);
+    function frame(t) {
+      var dt = Math.min(3, (t - last) / 16.7), el = t - t0, j;
+      last = t;
+      c.globalCompositeOperation = "destination-out"; c.fillStyle = "rgba(0,0,0,.2)"; c.fillRect(0, 0, B, H);
+      c.globalCompositeOperation = "lighter";
+      if (el < dauer - 1300 && el >= naechster) {
+        rakete(B * (.15 + Math.random() * .7), H * (.12 + Math.random() * .46));
+        naechster = el + 260 + Math.random() * 240;
+        if (Math.random() < .5) konfetti(14);
+      }
+      for (j = 0; j < funken.length; j++) {
+        var p = funken[j];
+        p.vx *= .985; p.vy = p.vy * .985 + .055 * dt; p.x += p.vx * dt; p.y += p.vy * dt; p.a -= p.zerfall * dt;
+        if (p.a > 0) { c.fillStyle = "hsla(" + p.h + ",100%,62%," + p.a.toFixed(2) + ")"; c.beginPath(); c.arc(p.x, p.y, p.z, 0, 6.283); c.fill(); }
+      }
+      funken = funken.filter(function (q) { return q.a > 0; });
+      k.clearRect(0, 0, B, H);
+      for (j = 0; j < konf.length; j++) {
+        var q = konf[j];
+        q.vx *= .99; q.vy = Math.min(q.vy + .12 * dt, 4.5); q.x += q.vx * dt; q.y += q.vy * dt; q.r += q.vr * dt;
+        k.save(); k.translate(q.x, q.y); k.rotate(q.r); k.fillStyle = q.f; k.fillRect(-q.b / 2, -q.b / 4, q.b, q.b / 2); k.restore();
+      }
+      konf = konf.filter(function (q) { return q.y < H + 30; });
+      if (el < dauer) feierRaf = requestAnimationFrame(frame);
+    }
+    feierRaf = requestAnimationFrame(frame);
+  }
+
   /* ---------- Zufriedenheit ---------- */
   var ZF = ["", "😣", "🙁", "😐", "🙂", "😄"];
   var ZFL = ["", "Gar nicht zufrieden", "Eher unzufrieden", "Geht so", "Zufrieden", "Sehr zufrieden"];
@@ -1525,7 +1614,8 @@ function zerlege(text, h, roh) {
     if (viel.length) { s += '<div class="rk-tag">Besonders zufrieden mit</div>'; viel.forEach(function (a) { s += '<div class="rk-z">' + ZF[a.zufrieden] + " " + esc(a.titel) + (a.mandant ? " " + chip(a.mandant, "mandant") : "") + '</div>'; }); }
     var zeiten_ = ["aus", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"];
     s += '<h3>Einstellungen Zufriedenheit</h3><div class="filter"><label>Abendabfrage ab <select data-meta="abend">' + zeiten_.map(function (z) { return '<option value="' + z + '"' + ((meta.abend || "17:00") === z ? " selected" : "") + '>' + (z === "aus" ? "aus" : z + " Uhr") + '</option>'; }).join("") + '</select></label>' +
-      '<label>Beim Abhaken nach Zufriedenheit fragen <select data-meta="zfrage"><option value="an"' + (meta.zfrage !== "aus" ? " selected" : "") + '>ja</option><option value="aus"' + (meta.zfrage === "aus" ? " selected" : "") + '>nein</option></select></label></div>';
+      '<label>Beim Abhaken nach Zufriedenheit fragen <select data-meta="zfrage"><option value="an"' + (meta.zfrage !== "aus" ? " selected" : "") + '>ja</option><option value="aus"' + (meta.zfrage === "aus" ? " selected" : "") + '>nein</option></select></label>' +
+      '<label>Feier beim Abhaken <select data-meta="feier"><option value="an"' + (meta.feier !== "aus" ? " selected" : "") + '>ja</option><option value="aus"' + (meta.feier === "aus" ? " selected" : "") + '>nein</option></select></label></div>';
     return s;
   }
   function zfText(r) {
