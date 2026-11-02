@@ -303,6 +303,24 @@ button.pille { font: inherit; font-size: 12.5px; font-weight: 600; color: inheri
 .zinfo { color: var(--muted); font-size: 13px; margin: 4px 2px 10px; }
 .zset { margin: 0 0 12px; }
 .zset summary { cursor: pointer; font-weight: 600; color: var(--muted); font-size: 13px; padding: 6px 2px; }
+
+/* ---------- Zufriedenheit ---------- */
+.ico.zf { font-size: 18px; line-height: 1; }
+.ico.zf.rated { border-color: var(--a1); background: #f5f3ff; }
+.zfrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 0 14px 12px 62px; }
+.kompakt .zfrow { padding-left: 14px; }
+.zfrow .zfl { flex: 1 1 100%; font-size: 12px; font-weight: 600; color: var(--muted); }
+.sm { width: 44px; height: 44px; border-radius: 50%; border: 1px solid #d6d4ee; background: #fff; display: grid; place-items: center; padding: 0; font-size: 24px; line-height: 1; transition: transform .15s, background .15s; }
+.sm:hover { transform: scale(1.12); background: #f5f3ff; }
+.sm.an { background: #ede9fe; border-color: var(--a1); box-shadow: 0 0 0 3px rgba(109,93,252,.2); }
+.smileys { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 14px; }
+.smileys.gross .sm { width: 54px; height: 54px; font-size: 30px; }
+.toast .sm { width: 38px; height: 38px; font-size: 20px; border: 0; background: rgba(255,255,255,.18); }
+.toast .sm:hover { background: rgba(255,255,255,.34); }
+.zftage { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 6px 0 10px; }
+.zft { border: 1px solid var(--line); background: #fff; border-radius: 12px; padding: 6px 0; display: grid; place-items: center; gap: 2px; font-size: 12px; color: var(--muted); font-weight: 600; }
+.zft b { font-size: 22px; line-height: 1.1; color: var(--ink); }
+.zft:hover { background: #f5f3ff; border-color: var(--a1); }
 @media (max-width: 560px) { .suche { max-width: none; flex-basis: 100%; margin-top: 12px; } }
 @media (max-width: 760px) {
   .kacheln { grid-template-columns: repeat(2, 1fr); }
@@ -547,7 +565,7 @@ function zerlege(text, h, roh) {
 
 <script>
 (function () {
-  var KEY = "aufgaben_v1", KEY_PK = "aufgaben_papierkorb_v1", KEY_META = "aufgaben_meta_v1", KEY_Z = "aufgaben_zeiten_v1";
+  var KEY = "aufgaben_v1", KEY_PK = "aufgaben_papierkorb_v1", KEY_META = "aufgaben_meta_v1", KEY_Z = "aufgaben_zeiten_v1", KEY_T = "aufgaben_tage_v1";
   var TAGESLIMIT = 6;
   var QUELLEN = ["E-Mail", "Telefon", "Gespräch", "Idee"];
 
@@ -556,15 +574,16 @@ function zerlege(text, h, roh) {
   function norm(a) {
     return { id: a.id || neueId(), titel: String(a.titel || "").trim() || "(ohne Titel)", eingang: a.eingang || "", deadline: a.deadline || "",
       plan: a.plan || "", erledigt: !!a.erledigt, erledigtAm: a.erledigtAm || "", wichtig: !!a.wichtig, dringend: !!a.dringend,
-      quelle: a.quelle || "", notiz: a.notiz || "", mandant: String(a.mandant || "").trim(), projekt: String(a.projekt || "").trim(), ohneZeit: !!a.ohneZeit,
+      quelle: a.quelle || "", notiz: a.notiz || "", mandant: String(a.mandant || "").trim(), projekt: String(a.projekt || "").trim(), ohneZeit: !!a.ohneZeit, zufrieden: [1, 2, 3, 4, 5].indexOf(+a.zufrieden) >= 0 ? +a.zufrieden : 0,
       unter: Array.isArray(a.unter) ? a.unter.map(function (u) { return { id: u.id || neueId(), titel: String(u.titel || "").trim(), erledigt: !!u.erledigt }; }).filter(function (u) { return u.titel; }) : [] };
   }
   var aufgaben = lade(KEY, []).map(norm);
   var papierkorb = lade(KEY_PK, []).map(function (e) { return { a: norm(e.a || e), am: e.am || "" }; });
   var meta = lade(KEY_META, {});
   var zeiten = lade(KEY_Z, []).map(normZ).filter(zOk);
+  var tage = normTage(lade(KEY_T, {}));
   var ui = { tab: meta.tab || "heute", status: "offen", wichtig: false, dringend: false, sort: "gruppe", kachel: null,
-    offenId: null, wocheOffset: 0, anim: true, zaehlen: true, neueId: null, mandant: "", projekt: "", suche: "", rueck: 0, zmodus: "woche", zoffset: 0, zgruppe: "tag", zedit: [], zfm: "" };
+    offenId: null, wocheOffset: 0, anim: true, zaehlen: true, neueId: null, mandant: "", projekt: "", suche: "", rueck: 0, zmodus: "woche", zoffset: 0, zgruppe: "tag", zedit: [], zfm: "", zfOffen: null, vonRueck: false };
   var warnte = false;
 
   function speichern() {
@@ -573,6 +592,7 @@ function zerlege(text, h, roh) {
       localStorage.setItem(KEY_PK, JSON.stringify(papierkorb));
       localStorage.setItem(KEY_META, JSON.stringify(meta));
       localStorage.setItem(KEY_Z, JSON.stringify(zeiten));
+      localStorage.setItem(KEY_T, JSON.stringify(tage));
     } catch (e) {
       if (!warnte) { warnte = true; alert("Speichern im Browser ist nicht möglich. Bitte sofort über \"Sichern\" eine Datei erzeugen."); }
     }
@@ -614,6 +634,7 @@ function zerlege(text, h, roh) {
     rechts: '<svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>',
     x: '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
     play: '<svg viewBox="0 0 24 24"><path d="M7 4.5l12 7.5-12 7.5z"/></svg>',
+    smile: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c.9 1.2 2 1.8 3.5 1.8s2.6-.6 3.5-1.8"/><path d="M9 9.6h.01M15 9.6h.01"/></svg>',
     stop: '<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
     kopie: '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>'
   };
@@ -722,7 +743,7 @@ function zerlege(text, h, roh) {
              '<button class="ico klein" data-akt="planplus" title="Einen Tag später">' + IC.rechts + '</button>';
     }
     akt += '<button class="ico wichtig' + (a.wichtig ? " an" : "") + (o.kompakt ? " klein" : "") + '" data-akt="wichtig" title="Wichtig">' + IC.stern + '</button>' +
-           '<button class="ico dringend' + (a.dringend ? " an" : "") + (o.kompakt ? " klein" : "") + '" data-akt="dringend" title="Dringend">' + IC.blitz + '</button>';
+           '<button class="ico dringend' + (a.dringend ? " an" : "") + (o.kompakt ? " klein" : "") + '" data-akt="dringend" title="Dringend">' + IC.blitz + '</button>' + zfButton(a, o);
     if (o.eigene) {
       akt += '<button class="ico" data-akt="hoch" title="Nach oben"' + (o.i > 0 ? "" : " disabled") + '>' + IC.hoch + '</button>' +
              '<button class="ico" data-akt="runter" title="Nach unten"' + (o.i < o.n - 1 ? "" : " disabled") + '>' + IC.runter + '</button>';
@@ -731,7 +752,7 @@ function zerlege(text, h, roh) {
     var html = '<div class="' + c.join(" ") + '" data-id="' + a.id + '" style="--i:' + Math.min(o.i || 0, 12) + '"><div class="kopf">' +
       '<button class="haken" data-akt="erledigt" title="Erledigt">' + IC.haken + '</button>' +
       '<div class="haupt" data-akt="auf"><div class="titel">' + esc(a.titel) + '</div><div class="chips">' + chipsFor(a, o) + '</div></div>' +
-      '<div class="aktionen">' + akt + '</div></div>' + zeitZeile(a, o);
+      '<div class="aktionen">' + akt + '</div></div>' + zfZeile(a) + zeitZeile(a, o);
     if (a.id === ui.offenId) {
       html += '<div class="details">' +
         '<label class="breit">Titel<input type="text" data-feld="titel" value="' + esc(a.titel) + '"></label>' +
@@ -787,7 +808,7 @@ function zerlege(text, h, roh) {
       '<circle class="bg" cx="48" cy="48" r="38" fill="none" stroke-width="9"/><circle class="fg" cx="48" cy="48" r="38" fill="none" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - q)).toFixed(1) + '"/></svg>' +
       '<div class="mitte"><b>' + (tot ? erl + "/" + tot : "–") + '</b><span>geschafft</span></div></div></div>' +
       '<div class="kacheln">' + kachel("ueber", z.ueber, "Überfällig", z.ueber ? " leuchtet" : "") + kachel("heute", z.heute, "Heute") + kachel("woche", z.woche, "Nächste 7 Tage") + kachel("ohne", z.ohne, "Ohne Termin") + '</div>' +
-      '<div class="hero-unten"><span class="pille ' + bk + '">' + bt + '</span>' + zeitPille() + dateiPille() + '<div class="rechts">' + dateiKnopf() +
+      '<div class="hero-unten"><span class="pille ' + bk + '">' + bt + '</span>' + zeitPille() + tagPille() + dateiPille() + '<div class="rechts">' + dateiKnopf() +
       '<button class="hbtn voll" data-akt="sichern">Sichern</button><button class="hbtn" data-akt="wiederherstellen">Wiederherstellen</button>' +
       '<button class="hbtn" data-akt="rueck">Rückblick</button><button class="hbtn" data-akt="kalender">Kalender</button>' +
       '<button class="hbtn" data-akt="papierkorb">Papierkorb (' + papierkorb.length + ')</button><button class="hbtn" data-akt="hilfe">Kürzel ?</button></div></div></div>';
@@ -1049,6 +1070,7 @@ function zerlege(text, h, roh) {
     if (akt === "iphlade") { iphoneLaden(); return; }
     if (akt === "ihgn") { iphoneIgnorieren(); return; }
     if (zeitKlick(akt, ziel)) return;
+    if (zfKlick(akt, ziel)) return;
     if (akt === "suchweg") { sucheLeeren(); render(); return; }
     if (akt === "rueck") { ui.rueck = 0; modal(rueckHtml()); return; }
     if (akt === "rnav") { var rd = +ziel.getAttribute("data-d"); ui.rueck = rd === 0 ? 0 : ui.rueck + rd; modal(rueckHtml()); return; }
@@ -1086,13 +1108,14 @@ function zerlege(text, h, roh) {
       a.unter.forEach(function (x) { if (x.id === uid2) x.erledigt = !x.erledigt; });
       speichern(); render();
       if (a.unter.length && !a.erledigt && a.unter.every(function (x) { return x.erledigt; })) {
-        toast("Alle Unteraufgaben sind erledigt.", "Aufgabe abhaken", function () { a.erledigt = true; a.erledigtAm = heute(); speichern(); render(); });
+        toast("Alle Unteraufgaben sind erledigt.", "Aufgabe abhaken", function () { a.erledigt = true; a.erledigtAm = heute(); speichern(); render(); zfFrage(a); });
       }
       return;
     }
     if (akt === "erledigt") {
       a.erledigt = !a.erledigt; a.erledigtAm = a.erledigt ? h : "";
       speichern();
+      if (a.erledigt) zfFrage(a);
       var hk = karte.querySelector(".haken");
       if (a.erledigt) { hk.classList.add("pop"); if (ui.status === "offen" || ui.tab === "heute") karte.classList.add("abgehakt"); }
       setTimeout(render, a.erledigt ? 420 : 0); return;
@@ -1179,7 +1202,10 @@ function zerlege(text, h, roh) {
       mandant: String(z.mandant || "").trim(), text: String(z.text || "").trim(), ue: !!z.ue };
   }
   function zOk(z) { return z.datum && z.min > 0; }
-  function zeitenUebernehmen(d) { if (d && !Array.isArray(d) && Array.isArray(d.zeiten)) zeiten = d.zeiten.map(normZ).filter(zOk); }
+  function zeitenUebernehmen(d) {
+    if (d && !Array.isArray(d) && Array.isArray(d.zeiten)) zeiten = d.zeiten.map(normZ).filter(zOk);
+    if (d && !Array.isArray(d) && d.tage && typeof d.tage === "object") tage = normTage(d.tage);
+  }
   function aufById(id) { for (var i = 0; i < aufgaben.length; i++) if (aufgaben[i].id === id) return aufgaben[i]; return null; }
   function zInfo(z) { var a = z.aid ? aufById(z.aid) : null; return { mandant: a ? a.mandant : z.mandant, text: a ? a.titel : z.text }; }
   function fmtMin(m) {
@@ -1430,6 +1456,107 @@ function zerlege(text, h, roh) {
     return false;
   }
 
+  /* ---------- Zufriedenheit ---------- */
+  var ZF = ["", "😣", "🙁", "😐", "🙂", "😄"];
+  var ZFL = ["", "Gar nicht zufrieden", "Eher unzufrieden", "Geht so", "Zufrieden", "Sehr zufrieden"];
+  function normTage(o) {
+    var r = {};
+    if (o && typeof o === "object" && !Array.isArray(o)) Object.keys(o).forEach(function (k) {
+      var v = o[k], s = Math.round(+(v && v.s));
+      if (/^\d{4}-\d{2}-\d{2}$/.test(k) && s >= 1 && s <= 5) r[k] = { s: s, n: String((v && v.n) || "") };
+    });
+    return r;
+  }
+  function smileyReihe(akt, v0, extra) {
+    return [1, 2, 3, 4, 5].map(function (v) {
+      return '<button class="sm' + (v0 === v ? " an" : "") + '" data-akt="' + akt + '" data-v="' + v + '"' + (extra || "") + ' title="' + ZFL[v] + '">' + ZF[v] + '</button>';
+    }).join("");
+  }
+  function zfButton(a, o) {
+    var v = a.zufrieden;
+    return '<button class="ico zf' + (v ? " rated" : "") + (o.kompakt ? " klein" : "") + '" data-akt="zf" title="Zufriedenheit mit dieser Aufgabe' + (v ? ": " + ZFL[v] : "") + '">' + (v ? ZF[v] : IC.smile) + '</button>';
+  }
+  function zfZeile(a) {
+    if (ui.zfOffen !== a.id) return "";
+    return '<div class="zfrow"><span class="zfl">Wie zufrieden bist du mit dieser Aufgabe?</span>' + smileyReihe("zset", a.zufrieden) + (a.zufrieden ? '<button class="knopf" data-akt="zset" data-v="0">Zurücksetzen</button>' : "") + '</div>';
+  }
+  function zfFrage(a) {
+    if (a.zufrieden || meta.zfrage === "aus") return;
+    var t = $("toast"); clearTimeout(toastTimer);
+    t.innerHTML = '<span>Wie zufrieden warst du?</span>' + smileyReihe("zfq", 0, ' data-aid="' + a.id + '"');
+    t.className = "toast sicht"; toastTimer = setTimeout(function () { t.className = "toast"; }, 9000);
+  }
+  function tagPille() {
+    var h = heute(), t = tage[h], ab = meta.abend || "17:00", n = new Date();
+    if (t) return '<button class="pille ok" data-akt="tagoeffnen" data-d="' + h + '" title="Tagesbewertung ändern: ' + ZFL[t.s] + '">Tag: ' + ZF[t.s] + '</button>';
+    if (ab !== "aus" && p2(n.getHours()) + ":" + p2(n.getMinutes()) >= ab) return '<button class="pille warn" data-akt="tagoeffnen" data-d="' + h + '">Tag bewerten</button>';
+    return "";
+  }
+  function tagHtml(d) {
+    var erl = aufgaben.filter(function (a) { return a.erledigt && a.erledigtAm === d; }).length, zs = tagSumme(d), cur = tage[d];
+    return '<h2>' + (d === heute() ? "Wie war dein Tag?" : "Wie war dein Tag am " + anz(d) + "?") + '</h2><p class="zinfo" style="margin-top:0">' + WD_LANG[wtag(d)] + ", " + anz(d) + " · " + erl + (erl === 1 ? " Aufgabe erledigt" : " Aufgaben erledigt") + (zs ? " · " + fmtMin(zs) + " gebucht" : "") + '</p>' +
+      '<div class="smileys gross">' + smileyReihe("tagset", cur ? cur.s : 0, ' data-d="' + d + '"') + '</div>' +
+      '<label style="display:block;font-size:12px;font-weight:600;color:var(--muted)">Kurznotiz (optional, wird mit dem Smiley gespeichert)<input type="text" id="tag_n" value="' + esc(cur ? cur.n : "") + '" placeholder="Was lief gut, was nicht?" style="width:100%;margin-top:4px"></label>' +
+      '<p style="margin-bottom:0">' + (cur ? '<button class="knopf rot" data-akt="tagweg" data-d="' + d + '">Bewertung entfernen</button> ' : "") +
+      (d === heute() && !cur ? '<button class="knopf" data-akt="tagspaeter">In einer Stunde erinnern</button> <button class="knopf" data-akt="tagnein">Heute nicht bewerten</button>' : "") + '</p>';
+  }
+  function abendPruefen() {
+    var h = heute(), ab = meta.abend || "17:00", n = new Date();
+    if (ab === "aus" || tage[h] || meta.abendNein === h) return;
+    if (p2(n.getHours()) + ":" + p2(n.getMinutes()) < ab) return;
+    if (meta.abendSnooze && Date.now() < meta.abendSnooze) return;
+    if ($("modal").classList.contains("sicht")) return;
+    var ae = document.activeElement; if (ae && /^(INPUT|TEXTAREA|SELECT)$/.test(ae.tagName)) return;
+    meta.abendSnooze = Date.now() + 60 * 60000; speichern();
+    ui.vonRueck = false; modal(tagHtml(h));
+  }
+  function zfRueck(r) {
+    var s = '<h3>Zufriedenheit</h3><div class="zftage">', summe = 0, n = 0;
+    for (var i = 0; i < 7; i++) {
+      var d = plusTage(r.mo, i), t = tage[d];
+      if (t) { summe += t.s; n++; }
+      s += '<button class="zft" data-akt="tagoeffnen" data-d="' + d + '" data-von="r" title="' + anz(d) + (t ? ": " + ZFL[t.s] : ": noch nicht bewertet") + '"><span>' + WD_KURZ[i] + '</span><b>' + (t ? ZF[t.s] : "–") + '</b></button>';
+    }
+    s += '</div>';
+    var bew = r.erl.filter(function (a) { return a.zufrieden; }), asum = bew.reduce(function (q, a) { return q + a.zufrieden; }, 0);
+    s += '<p class="rk-leer">' + (n ? "Tage Ø " + (summe / n).toFixed(1).replace(".", ",") + " von 5 (" + n + " bewertet)" : "Noch kein Tag bewertet") + " · " + (bew.length ? "Aufgaben Ø " + (asum / bew.length).toFixed(1).replace(".", ",") + " von 5 (" + bew.length + " bewertet)" : "keine Aufgabe bewertet") + '</p>';
+    var wenig = bew.filter(function (a) { return a.zufrieden <= 2; }).slice(0, 4), viel = bew.filter(function (a) { return a.zufrieden === 5; }).slice(0, 4);
+    if (wenig.length) { s += '<div class="rk-tag">Weniger zufrieden mit</div>'; wenig.forEach(function (a) { s += '<div class="rk-z">' + ZF[a.zufrieden] + " " + esc(a.titel) + (a.mandant ? " " + chip(a.mandant, "mandant") : "") + '</div>'; }); }
+    if (viel.length) { s += '<div class="rk-tag">Besonders zufrieden mit</div>'; viel.forEach(function (a) { s += '<div class="rk-z">' + ZF[a.zufrieden] + " " + esc(a.titel) + (a.mandant ? " " + chip(a.mandant, "mandant") : "") + '</div>'; }); }
+    var zeiten_ = ["aus", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"];
+    s += '<h3>Einstellungen Zufriedenheit</h3><div class="filter"><label>Abendabfrage ab <select data-meta="abend">' + zeiten_.map(function (z) { return '<option value="' + z + '"' + ((meta.abend || "17:00") === z ? " selected" : "") + '>' + (z === "aus" ? "aus" : z + " Uhr") + '</option>'; }).join("") + '</select></label>' +
+      '<label>Beim Abhaken nach Zufriedenheit fragen <select data-meta="zfrage"><option value="an"' + (meta.zfrage !== "aus" ? " selected" : "") + '>ja</option><option value="aus"' + (meta.zfrage === "aus" ? " selected" : "") + '>nein</option></select></label></div>';
+    return s;
+  }
+  function zfText(r) {
+    var ts = [], bew = r.erl.filter(function (a) { return a.zufrieden; });
+    for (var i = 0; i < 7; i++) { var t = tage[plusTage(r.mo, i)]; if (t) ts.push(t.s); }
+    var avg = function (arr) { return (arr.reduce(function (q, v) { return q + v; }, 0) / arr.length).toFixed(1).replace(".", ","); };
+    if (!ts.length && !bew.length) return "";
+    return "Zufriedenheit: " + (ts.length ? "Tage Ø " + avg(ts) + " (" + ts.length + ")" : "keine Tagesbewertung") + ", " + (bew.length ? "Aufgaben Ø " + avg(bew.map(function (a) { return a.zufrieden; })) + " (" + bew.length + ")" : "keine Aufgabenbewertung");
+  }
+  function zfKlick(akt, ziel) {
+    var kk = ziel.closest("[data-id]"), id = kk ? kk.getAttribute("data-id") : "", h = heute(), a, v, d, nt;
+    if (akt === "zf") { ui.zfOffen = ui.zfOffen === id ? null : id; render(); return true; }
+    if (akt === "zset") { a = aufById(id); if (!a) return true; v = +ziel.getAttribute("data-v"); a.zufrieden = (v && a.zufrieden !== v) ? v : 0; ui.zfOffen = null; speichern(); render(); return true; }
+    if (akt === "zfq") {
+      a = aufById(ziel.getAttribute("data-aid")); v = +ziel.getAttribute("data-v");
+      if (a) { a.zufrieden = v; speichern(); render(); }
+      $("toast").className = "toast"; toast("Gespeichert: " + ZF[v] + " " + ZFL[v]); return true;
+    }
+    if (akt === "tagoeffnen") { ui.vonRueck = ziel.getAttribute("data-von") === "r"; modal(tagHtml(ziel.getAttribute("data-d"))); return true; }
+    if (akt === "tagset") {
+      d = ziel.getAttribute("data-d"); v = +ziel.getAttribute("data-v"); nt = $("tag_n") ? $("tag_n").value.trim() : "";
+      tage[d] = { s: v, n: nt }; speichern(); render(); toast("Tag bewertet: " + ZF[v] + " " + ZFL[v]);
+      if (ui.vonRueck) modal(rueckHtml()); else modalZu();
+      return true;
+    }
+    if (akt === "tagweg") { delete tage[ziel.getAttribute("data-d")]; speichern(); render(); if (ui.vonRueck) modal(rueckHtml()); else modalZu(); return true; }
+    if (akt === "tagspaeter") { meta.abendSnooze = Date.now() + 60 * 60000; speichern(); modalZu(); toast("Ich frage in einer Stunde noch einmal."); return true; }
+    if (akt === "tagnein") { meta.abendNein = h; speichern(); modalZu(); render(); return true; }
+    return false;
+  }
+
   /* ---------- Wochenrückblick ---------- */
   function rueckDaten() {
     var h = heute(), mo = plusTage(montag(h), 7 * ui.rueck), so = plusTage(mo, 6);
@@ -1470,6 +1597,7 @@ function zerlege(text, h, roh) {
       s += '<div class="rk-z">' + esc(a.titel) + ' ' + (a.deadline ? chip("Deadline " + anz(a.deadline), "rot") : "") + (a.plan ? chip("Geplant " + anz(a.plan), "lila") : "") + '</div>';
     });
     if (ui.rueck === 0 && zahlen().ueber) s += '<p class="rk-leer">Aktuell überfällig (alle Wochen): ' + zahlen().ueber + '</p>';
+    s += zfRueck(r);
     return s + '<p style="margin-top:18px"><button class="knopf" data-akt="rkopie">Als Text kopieren</button></p>';
   }
   function rueckText() {
@@ -1481,6 +1609,7 @@ function zerlege(text, h, roh) {
     if (!r.nicht.length) z.push("- (nichts)");
     z.push("", "Neu erfasst: " + r.neu.length);
     if (r.zmin) z.push("Gebuchte Zeit: " + fmtMin(r.zmin));
+    var zt = zfText(r); if (zt) z.push(zt);
     return z.join("\n");
   }
   function kopiere(text, msg) {
@@ -1550,7 +1679,7 @@ function zerlege(text, h, roh) {
   var DFILE = "aufgaben-daten.json";
   var FSA = typeof window.showDirectoryPicker === "function" && typeof indexedDB !== "undefined";
   var datei = { dir: null, status: "aus", zeit: null, frisch: false, iphone: null }, dTimer = null, dSchreibt = false, dNochmal = false;
-  function sicherungText(stamp) { return JSON.stringify({ version: 3, aufgaben: aufgaben, papierkorb: papierkorb, zeiten: zeiten, gesichert: stamp || new Date().toISOString(), basis: meta.basis || "" }, null, 2); }
+  function sicherungText(stamp) { return JSON.stringify({ version: 3, aufgaben: aufgaben, papierkorb: papierkorb, zeiten: zeiten, tage: tage, gesichert: stamp || new Date().toISOString(), basis: meta.basis || "" }, null, 2); }
   function zeitText(stamp) { var d = new Date(stamp); return anz(iso(d)) + " " + p2(d.getHours()) + ":" + p2(d.getMinutes()); }
   function idb(fn) {
     return new Promise(function (res, rej) {
@@ -1799,6 +1928,8 @@ function zerlege(text, h, roh) {
   });
 
   dateiInit();
+  setTimeout(abendPruefen, 900); setInterval(abendPruefen, 60000);
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") abendPruefen(); });
   setInterval(function () { var z = $("lz"); if (z && meta.timer) z.textContent = hms(Math.max(0, Math.round((Date.now() - new Date(meta.timer.start).getTime()) / 1000))); }, 1000);
   vorschau(); render();
   try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) {}
